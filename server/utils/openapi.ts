@@ -745,6 +745,53 @@ export const openApiDocument = {
         },
       },
     },
+    "/api/users/employee-options": {
+      get: {
+        tags: ["Users"],
+        summary: "Pencarian dan daftar pilihan pegawai aktif untuk tautan akun user",
+        description: "Digunakan pada modal Tambah/Edit User untuk mencari pegawai berdasarkan Nama atau NIP, dan mengembalikan data jabatan serta departemen untuk autofill form.",
+        security: [{ bearerAuth: [] }, { cookieAuth: [] }],
+        parameters: [
+          { name: "q", in: "query", required: false, schema: { type: "string" }, description: "Kata kunci pencarian nama pegawai atau NIP" },
+        ],
+        responses: {
+          200: {
+            description: "Daftar pegawai aktif yang tersedia",
+            content: {
+              "application/json": {
+                schema: {
+                  type: "object",
+                  properties: {
+                    success: { type: "boolean", example: true },
+                    data: {
+                      type: "array",
+                      items: {
+                        type: "object",
+                        properties: {
+                          id: { type: "integer", example: 1 },
+                          nip: { type: "string", example: "EMP-001" },
+                          name: { type: "string", example: "Ahmad Hermawan" },
+                          email: { type: "string", example: "ahmad@example.com" },
+                          phone: { type: "string", example: "+6281234567801" },
+                          position_id: { type: "integer", example: 13 },
+                          position_name: { type: "string", example: "Manager HRD" },
+                          department_id: { type: "integer", example: 1 },
+                          department_name: { type: "string", example: "HRD" },
+                          linked_user_id: { type: "integer", nullable: true, example: 2 },
+                          linked_username: { type: "string", nullable: true, example: "manager.hrd" },
+                        },
+                      },
+                    },
+                  },
+                },
+              },
+            },
+          },
+          401: { description: "Sesi tidak valid atau belum login" },
+          403: { description: "Tidak memiliki hak akses modul user" },
+        },
+      },
+    },
     "/api/users": {
       get: {
         tags: ["Users"],

@@ -252,26 +252,30 @@
                 {{ formError }}
               </div>
 
-              <!-- NAMA PENGGUNA (Autosuggestion & Autocomplete dari Data Pegawai) -->
+              <!-- NAMA PENGGUNA (Search & Select dari Data Pegawai) -->
               <div class="mb-3 position-relative">
                 <label class="form-label required">
-                  Nama Pengguna (Data Pegawai)
+                  Nama Pengguna (Pilih dari Data Pegawai)
                 </label>
                 <div class="input-group">
+                  <span class="input-group-text bg-light">
+                    <IconSearch size="16" class="text-muted" />
+                  </span>
                   <input
                     v-model="employeeSearchInput"
                     type="text"
                     class="form-control"
                     :class="{ 'is-invalid': formErrors.name }"
-                    placeholder="Ketik minimal 2 karakter nama pegawai..."
+                    placeholder="Cari nama pegawai atau NIP..."
+                    autocomplete="off"
                     @input="onEmployeeSearchInput"
-                    @focus="showEmployeeSuggestions = employeeSuggestions.length > 0"
+                    @focus="onEmployeeSearchFocus"
                   />
                   <button
-                    v-if="formData.employee_id"
+                    v-if="formData.employee_id || employeeSearchInput"
                     class="btn btn-outline-secondary"
                     type="button"
-                    title="Lepaskan tautan pegawai"
+                    title="Reset pilihan pegawai"
                     @click="clearSelectedEmployee"
                   >
                     Reset
@@ -280,30 +284,54 @@
                 <div v-if="formErrors.name" class="invalid-feedback d-block">
                   {{ formErrors.name }}
                 </div>
-                <div v-if="formData.employee_nip" class="form-text text-success">
-                  Terpaut dengan Pegawai: <strong>{{ formData.name }}</strong> (NIP: {{ formData.employee_nip }})
+                
+                <!-- Badge Info Pegawai Terpaut -->
+                <div v-if="formData.employee_nip" class="mt-1 d-flex align-items-center gap-2 p-2 bg-blue-lt rounded">
+                  <IconCircleCheckFilled size="16" class="text-primary flex-shrink-0" />
+                  <div class="small">
+                    Pegawai Terpilih: <strong>{{ formData.name }}</strong> (NIP: <span class="font-monospace">{{ formData.employee_nip }}</span>)
+                  </div>
                 </div>
 
                 <!-- Dropdown Autosuggestion List -->
                 <div
-                  v-if="showEmployeeSuggestions && employeeSuggestions.length > 0"
-                  class="dropdown-menu show w-100 shadow-sm mt-1"
-                  style="max-height: 220px; overflow-y: auto;"
+                  v-if="showEmployeeSuggestions"
+                  class="dropdown-menu show w-100 shadow-lg mt-1 p-0"
+                  style="max-height: 260px; overflow-y: auto; z-index: 1060;"
                 >
-                  <a
-                    v-for="emp in employeeSuggestions"
-                    :key="emp.id"
-                    href="#"
-                    class="dropdown-item py-2"
-                    @click.prevent="selectEmployee(emp)"
-                  >
-                    <div>
-                      <div class="fw-semibold">{{ emp.name }}</div>
-                      <div class="small text-muted">
-                        NIP: {{ emp.nip || emp.employeeNumber }} • Jabatan: {{ emp.positionName || '-' }} • Dept: {{ emp.departmentName || '-' }}
+                  <div v-if="isLoadingEmployees" class="p-3 text-center text-muted small">
+                    <span class="spinner-border spinner-border-sm me-1" role="status"></span>
+                    Mencari pegawai...
+                  </div>
+                  <div v-else-if="employeeSuggestions.length === 0" class="p-3 text-center text-muted small">
+                    Tidak ditemukan data pegawai dengan kata kunci tersebut.
+                  </div>
+                  <template v-else>
+                    <a
+                      v-for="emp in employeeSuggestions"
+                      :key="emp.id"
+                      href="#"
+                      class="dropdown-item py-2 px-3 border-bottom"
+                      :class="{ 'active': formData.employee_id === emp.id }"
+                      @click.prevent="selectEmployee(emp)"
+                    >
+                      <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                          <div class="fw-semibold text-dark">{{ emp.name }}</div>
+                          <div class="small text-muted">
+                            <span class="font-monospace text-primary">NIP: {{ emp.nip }}</span>
+                            <span class="mx-1">•</span>
+                            <span>{{ emp.position_name || '-' }}</span>
+                            <span class="mx-1">•</span>
+                            <span>{{ emp.department_name || '-' }}</span>
+                          </div>
+                        </div>
+                        <span v-if="emp.linked_username" class="badge bg-warning-lt" title="Pegawai ini sudah memiliki akun">
+                          Akun: {{ emp.linked_username }}
+                        </span>
                       </div>
-                    </div>
-                  </a>
+                    </a>
+                  </template>
                 </div>
               </div>
 
@@ -337,14 +365,18 @@
                 </div>
               </div>
 
-              <!-- JABATAN & DEPARTEMEN -->
+              <!-- JABATAN & DEPARTEMEN (Auto-filled & read-only preview if linked, editable fallback) -->
               <div class="row g-3 mb-3">
                 <div class="col-md-6">
-                  <label class="form-label required">Jabatan</label>
+                  <label class="form-label">
+                    Jabatan
+                    <span v-if="formData.employee_id" class="badge bg-green-lt ms-1">Auto-fill Pegawai</span>
+                  </label>
                   <select
                     v-model="formData.position_id"
                     class="form-select"
-                    :class="{ 'is-invalid': formErrors.position_id }"
+                    :class="{ 'is-invalid': formErrors.position_id, 'bg-light': !!formData.employee_id }"
+                    :disabled="!!formData.employee_id"
                   >
                     <option :value="null" disabled>Pilih Jabatan</option>
                     <option
@@ -361,11 +393,15 @@
                 </div>
 
                 <div class="col-md-6">
-                  <label class="form-label required">Departemen</label>
+                  <label class="form-label">
+                    Departemen
+                    <span v-if="formData.employee_id" class="badge bg-green-lt ms-1">Auto-fill Pegawai</span>
+                  </label>
                   <select
                     v-model="formData.department_id"
                     class="form-select"
-                    :class="{ 'is-invalid': formErrors.department_id }"
+                    :class="{ 'is-invalid': formErrors.department_id, 'bg-light': !!formData.employee_id }"
+                    :disabled="!!formData.employee_id"
                   >
                     <option :value="null" disabled>Pilih Departemen</option>
                     <option
@@ -625,7 +661,7 @@ const {
 
 const rawUsers = computed(() => usersResponse.value?.data || []);
 
-// 2. Fetch Supporting Data: Roles, Positions, Departments, Employees
+// 2. Fetch Supporting Data: Roles, Positions, Departments
 const { data: rolesResponse } = await useFetch("/api/roles", { lazy: true });
 const rolesList = computed(() => rolesResponse.value?.data || []);
 
@@ -634,9 +670,6 @@ const positionsList = computed(() => positionsResponse.value || []);
 
 const { data: departmentsResponse } = await useFetch("/api/departments", { lazy: true });
 const departmentsList = computed(() => departmentsResponse.value || []);
-
-const { data: employeesResponse } = await useFetch("/api/employees", { lazy: true });
-const allEmployees = computed(() => employeesResponse.value || []);
 
 // Filtering & Sorting
 const searchQuery = ref("");
@@ -724,49 +757,84 @@ const formData = ref({
   isActive: true,
 });
 
-// Autosuggestion State
+// Employee Search & Select State
 const employeeSearchInput = ref("");
 const showEmployeeSuggestions = ref(false);
+const isLoadingEmployees = ref(false);
+const employeeSuggestions = ref([]);
+let employeeSearchDebounceTimer = null;
 
-const employeeSuggestions = computed(() => {
-  const query = employeeSearchInput.value.trim().toLowerCase();
-  if (query.length < 2) return [];
+const fetchEmployeeSuggestions = async (query = "") => {
+  try {
+    isLoadingEmployees.value = true;
+    const res = await $fetch("/api/users/employee-options", {
+      params: { q: query.trim() },
+    });
+    employeeSuggestions.value = res.data || [];
+  } catch (err) {
+    console.error("Failed to fetch employee options:", err);
+    employeeSuggestions.value = [];
+  } finally {
+    isLoadingEmployees.value = false;
+  }
+};
 
-  return allEmployees.value.filter((emp) => {
-    const name = (emp.name || "").toLowerCase();
-    const nip = (emp.nip || emp.employeeNumber || "").toLowerCase();
-    return name.includes(query) || nip.includes(query);
-  });
-});
+const onEmployeeSearchFocus = () => {
+  showEmployeeSuggestions.value = true;
+  if (employeeSuggestions.value.length === 0) {
+    fetchEmployeeSuggestions(employeeSearchInput.value);
+  }
+};
 
 const onEmployeeSearchInput = () => {
   showEmployeeSuggestions.value = true;
   formData.value.name = employeeSearchInput.value;
   formData.value.employee_id = null;
   formData.value.employee_nip = "";
+  
+  clearTimeout(employeeSearchDebounceTimer);
+  employeeSearchDebounceTimer = setTimeout(() => {
+    fetchEmployeeSuggestions(employeeSearchInput.value);
+  }, 250);
 };
 
 const selectEmployee = (emp) => {
   formData.value.name = emp.name;
   formData.value.employee_id = emp.id;
-  formData.value.employee_nip = emp.nip || emp.employeeNumber || "";
-  employeeSearchInput.value = emp.name;
+  formData.value.employee_nip = emp.nip;
+  employeeSearchInput.value = `${emp.name} (${emp.nip})`;
   showEmployeeSuggestions.value = false;
 
-  // Auto-fill Jabatan & Departemen jika ada
-  if (emp.positionId) {
-    formData.value.position_id = emp.positionId;
+  // Auto-fill Jabatan & Departemen sesuai data pegawai
+  if (emp.position_id) {
+    formData.value.position_id = emp.position_id;
   }
-  if (emp.departmentId) {
-    formData.value.department_id = emp.departmentId;
+  if (emp.department_id) {
+    formData.value.department_id = emp.department_id;
   }
+
+  // Jika username masih kosong dan belum edit mode, sarankan username berdasarkan nama/nip
+  if (!formData.value.username && !isEditMode.value) {
+    const cleanUsername = emp.name
+      .toLowerCase()
+      .replace(/[^a-z0-9]/g, "")
+      .slice(0, 15);
+    if (cleanUsername.length >= 6) {
+      formData.value.username = cleanUsername;
+      onUsernameInput();
+    }
+  }
+
+  formErrors.value.name = "";
 };
 
 const clearSelectedEmployee = () => {
   formData.value.employee_id = null;
   formData.value.employee_nip = "";
-  employeeSearchInput.value = "";
   formData.value.name = "";
+  employeeSearchInput.value = "";
+  employeeSuggestions.value = [];
+  showEmployeeSuggestions.value = false;
 };
 
 // Username Validation & Realtime Check
