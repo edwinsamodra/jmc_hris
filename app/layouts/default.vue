@@ -1,10 +1,10 @@
 <template>
   <div class="page">
     <Sidebar />
-    <Header />
 
     <!-- Content -->
     <div class="page-wrapper">
+      <Header />
       <!-- Page Content -->
       <div class="page-body">
         <div class="container-xl">

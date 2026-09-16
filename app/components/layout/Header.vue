@@ -253,31 +253,39 @@
           </div>
         </div>
 
-        <div class="nav-item dropdown">
+        <div class="nav-item dropdown position-relative" ref="userDropdownRef">
           <a
             href="#"
             class="nav-link d-flex lh-1 text-reset p-0 dropdown-toggle"
-            data-bs-toggle="dropdown"
+            :class="{ show: isDropdownOpen }"
+            @click.prevent="toggleUserDropdown"
           >
-            <span class="bg-primary text-white avatar rounded-circle">
-              {{ getInitials("User Name") }}
+            <span class="bg-primary text-white avatar rounded-circle shadow-sm">
+              {{ initials }}
             </span>
-            <div class="d-none d-xl-block ps-2">
-              <div class="fw-bold">USER NAME</div>
-              <div class="mt-1 small text-primary">USER ROLE</div>
+            <div class="d-none d-xl-block ps-2 text-start">
+              <div class="fw-bold">{{ user?.name || "Memuat..." }}</div>
+              <div class="mt-1 small text-primary fw-semibold">{{ userRoleLabel }}</div>
             </div>
           </a>
-          <div class="dropdown-menu dropdown-menu-end dropdown-menu-arrow">
-            <a href="?page=profile" class="dropdown-item"
-              ><i class="bi bi-person me-2"></i> My Profile</a
-            >
-            <a href="?page=change-password" class="dropdown-item"
-              ><i class="bi bi-key me-2"></i> Change Password</a
-            >
+          <div
+            class="dropdown-menu dropdown-menu-end dropdown-menu-arrow shadow"
+            :class="{ show: isDropdownOpen }"
+            :style="isDropdownOpen ? 'display: block; position: absolute; top: 100%; right: 0; margin-top: 0.5rem; z-index: 1050;' : ''"
+          >
+            <NuxtLink to="/profile" class="dropdown-item" @click="isDropdownOpen = false">
+              <svg xmlns="http://www.w3.org/2000/svg" class="icon me-2" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><circle cx="12" cy="7" r="4" /><path d="M6 21v-2a4 4 0 0 1 4 -4h4a4 4 0 0 1 4 4v2" /></svg>
+              <span>My Profile</span>
+            </NuxtLink>
+            <NuxtLink to="/profile/change-password" class="dropdown-item" @click="isDropdownOpen = false">
+              <svg xmlns="http://www.w3.org/2000/svg" class="icon me-2" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><circle cx="8" cy="15" r="4" /><line x1="10.85" y1="12.15" x2="19" y2="4" /><line x1="18" y1="5" x2="20" y2="7" /><line x1="15" y1="8" x2="17" y2="10" /></svg>
+              <span>Change Password</span>
+            </NuxtLink>
             <div class="dropdown-divider"></div>
-            <a href="logout.php" class="dropdown-item text-danger"
-              ><i class="bi bi-box-arrow-right me-2"></i> Logout</a
-            >
+            <button @click="handleHeaderLogout" type="button" class="dropdown-item text-danger border-0 bg-transparent w-100 text-start">
+              <svg xmlns="http://www.w3.org/2000/svg" class="icon me-2 text-danger" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M14 8v-2a2 2 0 0 0 -2 -2h-7a2 2 0 0 0 -2 2v12a2 2 0 0 0 2 2h7a2 2 0 0 0 2 -2v-2" /><path d="M7 12h14l-3 -3m0 6l3 -3" /></svg>
+              <span>Logout</span>
+            </button>
           </div>
         </div>
       </div>
@@ -288,4 +296,52 @@
 <script setup>
 const { toggleTheme } = useTheme();
 const { toggleSidebar } = useSidebar();
+const { user, logout } = useAuth();
+
+const isDropdownOpen = ref(false);
+const userDropdownRef = ref(null);
+
+const toggleUserDropdown = () => {
+  isDropdownOpen.value = !isDropdownOpen.value;
+};
+
+const handleHeaderLogout = () => {
+  isDropdownOpen.value = false;
+  logout();
+};
+
+const handleClickOutside = (e) => {
+  if (userDropdownRef.value && !userDropdownRef.value.contains(e.target)) {
+    isDropdownOpen.value = false;
+  }
+};
+
+onMounted(() => {
+  if (typeof window !== "undefined") {
+    document.addEventListener("click", handleClickOutside);
+  }
+});
+
+onUnmounted(() => {
+  if (typeof window !== "undefined") {
+    document.removeEventListener("click", handleClickOutside);
+  }
+});
+
+const initials = computed(() => {
+  if (!user.value?.name) return "U";
+  const parts = user.value.name.trim().split(" ");
+  if (parts.length >= 2) {
+    return (parts[0][0] + parts[1][0]).toUpperCase();
+  }
+  return parts[0].substring(0, 2).toUpperCase();
+});
+
+const userRoleLabel = computed(() => {
+  const roleCode = user.value?.role_code || user.value?.role?.code;
+  if (roleCode === "superadmin") return "Superadmin";
+  if (roleCode === "manager_hrd") return "Manager HRD";
+  if (roleCode === "admin_hrd") return "Admin HRD";
+  return user.value?.role_name || user.value?.role?.name || "Pengguna";
+});
 </script>

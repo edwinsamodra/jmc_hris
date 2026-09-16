@@ -11,11 +11,13 @@ export const menuItems = [
     title: "Dashboard",
     icon: IconLayoutDashboardFilled,
     to: "/",
+    moduleCode: "dashboard",
   },
   {
     title: "Data Pegawai",
     icon: IconUserFilled,
     to: "/pegawai",
+    moduleCode: "employee",
   },
   {
     title: "Tunjangan",
@@ -24,10 +26,12 @@ export const menuItems = [
       {
         title: "Setting Tunjangan Transport",
         to: "/tunjangan/setting",
+        moduleCode: "transport_setting",
       },
       {
         title: "Tunjangan Transport",
         to: "/tunjangan/transport",
+        moduleCode: "transport_allowance",
       },
     ],
   },
@@ -38,10 +42,12 @@ export const menuItems = [
       {
         title: "Manajemen Role",
         to: "/user/role",
+        moduleCode: "role",
       },
       {
         title: "Manajemen User",
         to: "/user/manage",
+        moduleCode: "user",
       },
     ],
   },
@@ -49,5 +55,6 @@ export const menuItems = [
     title: "Log Aktifitas",
     icon: IconHistory,
     to: "/log",
+    moduleCode: "activity_log",
   },
 ];

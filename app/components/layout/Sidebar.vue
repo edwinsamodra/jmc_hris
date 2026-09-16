@@ -53,7 +53,7 @@
           class="offcanvas-body p-3 p-lg-0 flex-column flex-grow-1 overflow-auto"
         >
           <ul class="navbar-nav align-items-start pt-lg-3">
-            <template v-for="item in menuItems">
+            <template v-for="item in filteredMenuItems">
               <!-- Menu dengan children (dropdown) -->
               <li
                 :key="item.title"
@@ -100,7 +100,6 @@
                 </div>
               </li>
 
-              <!-- Menu biasa (tanpa children) -->
               <li v-else class="nav-item" :key="item.title">
                 <NuxtLink
                   :to="item.to"
@@ -127,6 +126,34 @@ import { menuItems } from "~/data/menu.js";
 const appName = "Admin";
 const route = useRoute();
 const config = useRuntimeConfig();
+const { hasModuleAccess, user } = useAuth();
+
+// Filter menu items berdasarkan RBAC module permissions
+const filteredMenuItems = computed(() => {
+  // Jika belum login / permissions belum dimuat, tampilkan default
+  if (!user.value) return menuItems;
+
+  return menuItems
+    .map((item) => {
+      if (item.children) {
+        const allowedChildren = item.children.filter((child) =>
+          !child.moduleCode || hasModuleAccess(child.moduleCode),
+        );
+        if (allowedChildren.length === 0) return null;
+        return {
+          ...item,
+          children: allowedChildren,
+        };
+      }
+
+      if (item.moduleCode && !hasModuleAccess(item.moduleCode)) {
+        return null;
+      }
+
+      return item;
+    })
+    .filter(Boolean);
+});
 
 // Dropdown yang sedang terbuka
 const openDropdowns = ref([]);
@@ -157,7 +184,7 @@ const toggleDropdown = (title) => {
 watch(
   () => route.path,
   () => {
-    menuItems.forEach((item) => {
+    filteredMenuItems.value.forEach((item) => {
       if (item.children && isParentActive(item)) {
         if (!openDropdowns.value.includes(item.title)) {
           openDropdowns.value.push(item.title);

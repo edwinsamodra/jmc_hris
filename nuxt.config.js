@@ -16,10 +16,15 @@ export default defineNuxtConfig({
       user: process.env.DB_USER || "admin",
       password: process.env.DB_PASSWORD || "",
     },
+    recaptchaSecretKey:
+      process.env.RECAPTCHA_SECRET_KEY || "",
     public: {
-      appName: process.env.APP_NAME,
-      appClient: process.env.APP_CLIENT,
-      recaptchaSiteKey: process.env.NUXT_PUBLIC_RECAPTCHA_SITE_KEY,
+      appName: process.env.APP_NAME || "HRIS",
+      appClient: process.env.APP_CLIENT || "HRIS",
+      recaptchaSiteKey:
+        process.env.RECAPTCHA_SITE_KEY ||
+        process.env.NUXT_PUBLIC_RECAPTCHA_SITE_KEY ||
+        "",
     },
   },
 
@@ -40,7 +45,7 @@ export default defineNuxtConfig({
       link: [{ rel: "icon", type: "image/x-icon", href: "/favicon.png" }],
       script: [
         {
-          src: "https://www.google.com/recaptcha/api.js",
+          src: `https://www.google.com/recaptcha/enterprise.js?render=${process.env.RECAPTCHA_SITE_KEY || "6LeFkr4tAAAAAN4NFL38ng_QdKuimjUwa6JXZct6"}`,
           async: true,
           defer: true,
         },
