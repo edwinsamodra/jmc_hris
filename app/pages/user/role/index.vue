@@ -1,85 +1,98 @@
 <template>
   <div class="card">
     <div class="card-header">
-      <div class="d-flex gap-2 ms-auto">
+      <div class="d-flex flex-wrap gap-2 ms-auto align-items-center">
         <!-- Filter Role -->
-        <select name="" id="" class="form-select" style="width: 180px">
+        <select v-model="selectedRoleFilter" class="form-select" style="width: 200px">
           <option value="">Semua Role</option>
-          <option value="">Super Admin</option>
-          <option value="">Admin</option>
-          <option value="">Marketing</option>
-          <option value="">Finance</option>
+          <option
+            v-for="roleItem in allRoles"
+            :key="roleItem.id"
+            :value="roleItem.id"
+          >
+            {{ roleItem.name }}
+          </option>
         </select>
 
         <!-- Search -->
-        <div class="input-group">
-          <input type="text" class="form-control" placeholder="Cari Data ..." />
-          <button class="btn" type="button">
+        <div class="input-group" style="width: 250px">
+          <input
+            v-model="searchQuery"
+            type="text"
+            class="form-control"
+            placeholder="Cari Role / Deskripsi..."
+          />
+          <button class="btn" type="button" @click="searchQuery = ''" v-if="searchQuery">
+            &times;
+          </button>
+          <button class="btn" type="button" v-else>
             <IconSearch stroke="{2}" />
           </button>
         </div>
       </div>
     </div>
-    <div class="table-responsive card-body p-0">
-      <table class="table table-vcenter">
+
+    <!-- Loading State -->
+    <div v-if="pending" class="card-body text-center py-5">
+      <div class="spinner-border text-primary" role="status"></div>
+      <div class="mt-2 text-muted">Memuat data role...</div>
+    </div>
+
+    <!-- Error State -->
+    <div v-else-if="error" class="card-body text-center py-5 text-danger">
+      <p>Gagal memuat data role: {{ error.message || 'Terjadi kesalahan sistem' }}</p>
+      <button class="btn btn-sm btn-outline-primary" @click="refresh()">Coba Lagi</button>
+    </div>
+
+    <!-- Table View -->
+    <div v-else class="table-responsive card-body p-0">
+      <table class="table table-vcenter table-hover mb-0">
         <thead>
           <tr>
-            <th width="5">No</th>
-            <th>Role</th>
+            <th style="width: 60px" class="text-center">No</th>
+            <th style="width: 200px">Role</th>
             <th>Deskripsi</th>
-            <th class="text-center">Aksi</th>
+            <th class="text-center" style="width: 140px">Aksi</th>
           </tr>
         </thead>
-        <tbody v-for="(item, index) in manajemenRole" :key="item.id">
-          <tr>
-            <td class="text-center">{{ index + 1 }}</td>
-            <td>{{ item.role }}</td>
-            <td>{{ item.deskripsi }}</td>
+        <tbody>
+          <tr v-for="(item, index) in filteredRoles" :key="item.id">
+            <td class="text-center text-muted">{{ index + 1 }}</td>
+            <td class="fw-semibold text-dark">
+              {{ item.name }}
+              <div class="small text-muted font-monospace">{{ item.code }}</div>
+            </td>
+            <td class="text-secondary">{{ item.description }}</td>
             <td class="text-center">
               <NuxtLink
-                :to="`role/hak-akses/${item.id}`"
-                class="btn btn-sm btn-primary"
-                >Hak Akses
+                :to="`/user/role/hak-akses/${item.id}`"
+                class="btn btn-sm btn-primary d-inline-flex align-items-center gap-1"
+              >
+                <IconShieldLock size="16" />
+                <span>Hak Akses</span>
               </NuxtLink>
+            </td>
+          </tr>
+          <tr v-if="filteredRoles.length === 0">
+            <td colspan="4" class="text-center py-4 text-muted">
+              Tidak ada data role yang sesuai dengan filter/pencarian.
             </td>
           </tr>
         </tbody>
       </table>
     </div>
+
     <div class="card-footer d-flex align-items-center">
-      <ul class="pagination ms-auto m-0">
-        <li class="page-item"><a class="page-link" href="#">1</a></li>
-        <li class="page-item active"><a class="page-link" href="#">2</a></li>
-        <li class="page-item"><a class="page-link" href="#">3</a></li>
-        <li class="page-item"><a class="page-link" href="#">4</a></li>
-        <li class="page-item"><a class="page-link" href="#">5</a></li>
-        <li class="page-item">
-          <a class="page-link" href="#">
-            next
-            <!-- Download SVG icon from http://tabler-icons.io/i/chevron-right -->
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              class="icon"
-              width="24"
-              height="24"
-              viewBox="0 0 24 24"
-              stroke-width="2"
-              stroke="currentColor"
-              fill="none"
-              stroke-linecap="round"
-              stroke-linejoin="round"
-            >
-              <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
-              <path d="M9 6l6 6l-6 6"></path>
-            </svg>
-          </a>
-        </li>
-      </ul>
+      <span class="text-muted small">
+        Menampilkan {{ filteredRoles.length }} dari {{ allRoles.length }} role
+      </span>
     </div>
   </div>
 </template>
 
 <script setup>
+import { IconSearch, IconShieldLock } from "@tabler/icons-vue";
+
 definePageMeta({
   title: "Manajemen Role",
 });
@@ -88,6 +101,35 @@ useSeoMeta({
   title: "Manajemen Role",
 });
 
-import { IconSearch } from "@tabler/icons-vue";
-import { manajemenRole } from "~/data/manajemen-role.js";
+const searchQuery = ref("");
+const selectedRoleFilter = ref("");
+
+// Fetch real data role dari endpoint /api/roles
+const { data: responseData, pending, error, refresh } = await useFetch("/api/roles", {
+  lazy: true,
+});
+
+const allRoles = computed(() => {
+  return responseData.value?.data || [];
+});
+
+const filteredRoles = computed(() => {
+  let list = allRoles.value;
+
+  if (selectedRoleFilter.value) {
+    list = list.filter((r) => String(r.id) === String(selectedRoleFilter.value));
+  }
+
+  if (searchQuery.value.trim()) {
+    const q = searchQuery.value.toLowerCase().trim();
+    list = list.filter(
+      (r) =>
+        (r.name && r.name.toLowerCase().includes(q)) ||
+        (r.description && r.description.toLowerCase().includes(q)) ||
+        (r.code && r.code.toLowerCase().includes(q)),
+    );
+  }
+
+  return list;
+});
 </script>

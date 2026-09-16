@@ -13,6 +13,7 @@ export const openApiDocument = {
     { name: "Employees", description: "Data pegawai" },
     { name: "Departments", description: "Data departemen" },
     { name: "Attendances", description: "Data absensi" },
+    { name: "Roles", description: "Manajemen data role dan hak akses modul (RBAC)" },
   ],
   paths: {
     "/api/auth/google": {
@@ -454,6 +455,88 @@ export const openApiDocument = {
         },
       },
     },
+    "/api/roles": {
+      get: {
+        tags: ["Roles"],
+        summary: "Ambil daftar semua role pengguna",
+        parameters: [
+          {
+            name: "q",
+            in: "query",
+            required: false,
+            schema: { type: "string" },
+            description: "Pencarian nama/kode/deskripsi role",
+          },
+        ],
+        responses: {
+          200: {
+            description: "Daftar role pengguna",
+            content: {
+              "application/json": {
+                schema: {
+                  type: "object",
+                  properties: {
+                    success: { type: "boolean", example: true },
+                    data: {
+                      type: "array",
+                      items: { $ref: "#/components/schemas/RoleItem" },
+                    },
+                  },
+                },
+              },
+            },
+          },
+          401: { description: "Sesi tidak valid / belum login" },
+          403: { description: "Tidak memiliki hak akses ke modul role (hanya Superadmin)" },
+          500: { $ref: "#/components/responses/ServerError" },
+        },
+      },
+    },
+    "/api/roles/{id}": {
+      get: {
+        tags: ["Roles"],
+        summary: "Ambil detail informasi role dan matriks hak akses seluruh modul",
+        parameters: [
+          {
+            name: "id",
+            in: "path",
+            required: true,
+            schema: { type: "string" },
+            description: "ID atau Code Role",
+            example: "1",
+          },
+        ],
+        responses: {
+          200: {
+            description: "Detail role dan permissions modul",
+            content: {
+              "application/json": {
+                schema: {
+                  type: "object",
+                  properties: {
+                    success: { type: "boolean", example: true },
+                    data: {
+                      type: "object",
+                      properties: {
+                        role: { $ref: "#/components/schemas/RoleItem" },
+                        permissions: {
+                          type: "array",
+                          items: { $ref: "#/components/schemas/RolePermissionItem" },
+                        },
+                      },
+                    },
+                  },
+                },
+              },
+            },
+          },
+          401: { description: "Sesi tidak valid / belum login" },
+          403: { description: "Tidak memiliki hak akses ke modul role (hanya Superadmin)" },
+          404: { description: "Role tidak ditemukan" },
+          500: { $ref: "#/components/responses/ServerError" },
+        },
+      },
+    },
   },
   components: {
     responses: {
@@ -642,6 +725,35 @@ export const openApiDocument = {
             type: "array",
             items: { $ref: "#/components/schemas/EmployeeListItem" },
           },
+        },
+      },
+      RoleItem: {
+        type: "object",
+        properties: {
+          id: { type: "integer", example: 1 },
+          code: { type: "string", example: "superadmin" },
+          name: { type: "string", example: "Superadmin" },
+          description: {
+            type: "string",
+            example: "Memiliki hak akses penuh untuk kelola user, role, profile, dashboard, dan modul log.",
+          },
+          created_at: { type: "string", format: "date-time" },
+          updated_at: { type: "string", format: "date-time" },
+        },
+      },
+      RolePermissionItem: {
+        type: "object",
+        properties: {
+          module_id: { type: "integer", example: 1 },
+          module_code: { type: "string", example: "auth" },
+          module_name: { type: "string", example: "Login/Logout/Session" },
+          module_description: { type: "string", example: "Modul autentikasi, OTP email, dan manajemen sesi pengguna" },
+          sort_order: { type: "integer", example: 1 },
+          can_access: { type: "integer", example: 1 },
+          can_create: { type: "integer", example: 0 },
+          read_scope: { type: "string", enum: ["all", "own", "no"], example: "all" },
+          update_scope: { type: "string", enum: ["all", "own", "no"], example: "no" },
+          delete_scope: { type: "string", enum: ["all", "own", "no"], example: "no" },
         },
       },
       Error: {
