@@ -11,16 +11,17 @@
     "postinstall": "nuxt prepare"
   },
   "dependencies": {
-    "@tabler/core": "1.0.0-beta24",
-    "@tabler/icons-vue": "^3.44.0",
-    "apexcharts": "^3.54.0",
-    "jquery": "^3.7.1",
-    "nuxt": "^4.0.0",
-    "swiper": "^12.1.4",
+    "@tabler/core": "1.5.1",
+    "@tabler/icons-vue": "^3.46.0",
+    "apexcharts": "^7.3.0",
+    "jquery": "^4.0.0",
+    "mariadb": "^3.5.4",
+    "nuxt": "^4.5.2",
+    "swiper": "^14.2.0",
     "vue": "latest",
-    "vue-recaptcha": "^3.0.0-alpha.2",
+    "vue-recaptcha": "^3.0.0-alpha.6",
     "vue-router": "latest",
-    "vue3-apexcharts": "1.6.0"
+    "vue3-apexcharts": "1.11.1"
   },
   "devDependencies": {
     "vite-plugin-commonjs": "^0.10.4"

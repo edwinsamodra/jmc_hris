@@ -21,8 +21,6 @@
           @click="toggleTheme()"
           class="nav-link px-0 btn-toggle-theme hide-theme-dark"
           title="Enable dark mode"
-          data-bs-toggle="tooltip"
-          data-bs-placement="bottom"
           type="button"
         >
           <!-- Download SVG icon from http://tabler-icons.io/i/moon -->
@@ -48,8 +46,6 @@
           @click="toggleTheme()"
           class="nav-link px-0 btn-toggle-theme hide-theme-light"
           title="Enable light mode"
-          data-bs-toggle="tooltip"
-          data-bs-placement="bottom"
           type="button"
         >
           <!-- Download SVG icon from http://tabler-icons.io/i/moon -->

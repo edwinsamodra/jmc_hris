@@ -74,12 +74,18 @@ body {
 
 #sidebar-menu .dropdown-menu {
   position: relative;
+  top: 0 !important;
   width: calc(100% - 20px);
   background: none;
   box-shadow: none;
   border: none;
   border-left: 1px dashed #fff3;
   margin-left: 20px !important;
+}
+
+#sidebar-menu .dropdown-menu[data-bs-popper],
+#sidebar-menu .dropdown-menu[data-tblr-popper] {
+  top: 0 !important;
 }
 
 #sidebar-menu .dropdown-menu .dropdown-item {

@@ -87,8 +87,6 @@ import { formatDateID } from "~/utils/formatDate.js";
                   <!-- Aksi Edit -->
                   <NuxtLink :to="`/pegawai/form/${item.nip}`" class="text-dark">
                     <span
-                      data-bs-toggle="tooltip"
-                      data-bs-placement="bottom"
                       title="Edit"
                     >
                       <IconPencil stroke="{1}" size="20" />
@@ -98,8 +96,6 @@ import { formatDateID } from "~/utils/formatDate.js";
                   <!-- Aksi Detail -->
                   <NuxtLink :to="`/pegawai/${item.nip}`" class="text-dark">
                     <span
-                      data-bs-toggle="tooltip"
-                      data-bs-placement="bottom"
                       title="Detail"
                     >
                       <IconFileDescription stroke="{1}" size="20" />
@@ -109,8 +105,6 @@ import { formatDateID } from "~/utils/formatDate.js";
                   <!-- Aksi Download -->
                   <a href="#" class="text-dark">
                     <span
-                      data-bs-toggle="tooltip"
-                      data-bs-placement="bottom"
                       title="Download"
                     >
                       <IconCloudDownload stroke="{1}" size="20" />
@@ -125,8 +119,6 @@ import { formatDateID } from "~/utils/formatDate.js";
                     data-bs-target="#modal-hapus"
                   >
                     <span
-                      data-bs-toggle="tooltip"
-                      data-bs-placement="bottom"
                       title="Hapus"
                     >
                       <IconTrash stroke="{1}" size="20" />

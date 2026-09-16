@@ -19,7 +19,7 @@
             <div class="btn-list">
               <button
                 class="btn btn-toggle-theme btn-icon"
-                :title="isDark ? 'Switch to Light Mode' : 'Switch to Dark Mode'"
+                :title="isMounted ? (isDark ? 'Switch to Light Mode' : 'Switch to Dark Mode') : ''"
                 @click="toggleTheme"
               >
                 <i v-if="isDark" class="ti ti-sun"></i>
@@ -107,4 +107,7 @@ import { useSidebar } from "@/composables/useSidebar";
 
 const { isDark, toggleTheme } = useTheme();
 const { toggleSidebar } = useSidebar();
+
+const isMounted = ref(false);
+onMounted(() => { isMounted.value = true; });
 </script>

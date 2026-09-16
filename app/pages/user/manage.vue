@@ -59,8 +59,6 @@
                     data-bs-target="#modal-add"
                   >
                     <span
-                      data-bs-toggle="tooltip"
-                      data-bs-placement="bottom"
                       title="Edit"
                     >
                       <IconPencil stroke="{1}" size="20" />
@@ -75,8 +73,6 @@
                     data-bs-target="#modal-hapus"
                   >
                     <span
-                      data-bs-toggle="tooltip"
-                      data-bs-placement="bottom"
                       title="Hapus"
                     >
                       <IconTrash stroke="{1}" size="20" />
