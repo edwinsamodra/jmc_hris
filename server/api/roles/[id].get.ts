@@ -1,5 +1,6 @@
 import { query } from "#server/utils/database";
 import { requirePermission } from "#server/utils/rbac";
+import { logActivity } from "#server/utils/auth-session";
 import { createError } from "h3";
 
 export interface RoleDetailRow {
@@ -26,7 +27,7 @@ export interface RolePermissionDetailRow {
 
 export default defineEventHandler(async (event) => {
   // Hanya user dengan permission 'read' pada modul 'role' yang diizinkan (Superadmin)
-  await requirePermission(event, "role", "read");
+  const auth = await requirePermission(event, "role", "read");
 
   const idParam = getRouterParam(event, "id");
   if (!idParam) {
@@ -71,6 +72,16 @@ export default defineEventHandler(async (event) => {
     [role.id],
   );
 
+  // Catat audit log activity read detail role
+  await logActivity(event, {
+    userId: auth.sessionUser.id,
+    moduleCode: "role",
+    action: "read",
+    description: `Melihat detail hak akses role '${role.name}' (${role.code})`,
+    subjectType: "roles",
+    subjectId: role.id,
+  });
+
   return {
     success: true,
     data: {
@@ -79,3 +90,4 @@ export default defineEventHandler(async (event) => {
     },
   };
 });
+

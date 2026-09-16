@@ -1,9 +1,10 @@
 import { query } from "#server/utils/database";
 import { requirePermission } from "#server/utils/rbac";
+import { logActivity } from "#server/utils/auth-session";
 import { createError } from "h3";
 
 export default defineEventHandler(async (event) => {
-  await requirePermission(event, "user", "read");
+  const auth = await requirePermission(event, "user", "read");
 
   const idParam = getRouterParam(event, "id");
   if (!idParam) {
@@ -40,8 +41,21 @@ export default defineEventHandler(async (event) => {
     });
   }
 
+  const user = users[0];
+
+  // Catat audit log activity read detail user
+  await logActivity(event, {
+    userId: auth.sessionUser.id,
+    moduleCode: "user",
+    action: "read",
+    description: `Melihat detail data user '${user.username}' (${user.name})`,
+    subjectType: "users",
+    subjectId: user.id,
+  });
+
   return {
     success: true,
-    data: users[0],
+    data: user,
   };
 });
+

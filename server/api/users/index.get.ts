@@ -1,5 +1,6 @@
 import { query } from "#server/utils/database";
 import { requirePermission } from "#server/utils/rbac";
+import { logActivity } from "#server/utils/auth-session";
 
 export interface UserRow {
   id: number;
@@ -23,7 +24,7 @@ export interface UserRow {
 }
 
 export default defineEventHandler(async (event) => {
-  await requirePermission(event, "user", "read");
+  const auth = await requirePermission(event, "user", "read");
 
   const urlQuery = getQuery(event);
   const search = typeof urlQuery.q === "string" ? urlQuery.q.trim() : "";
@@ -66,8 +67,18 @@ export default defineEventHandler(async (event) => {
 
   const users = await query<UserRow>(sql, params);
 
+  // Catat audit log activity read list users
+  await logActivity(event, {
+    userId: auth.sessionUser.id,
+    moduleCode: "user",
+    action: "read",
+    description: `Melihat daftar pengguna aplikasi${search ? ` (filter: "${search}")` : ""}`,
+    subjectType: "users",
+  });
+
   return {
     success: true,
     data: users,
   };
 });
+
