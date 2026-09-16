@@ -14,6 +14,8 @@ export const openApiDocument = {
     { name: "Departments", description: "Data departemen" },
     { name: "Attendances", description: "Data absensi" },
     { name: "Roles", description: "Manajemen data role dan hak akses modul (RBAC)" },
+    { name: "Users", description: "Manajemen data user pengguna sistem" },
+    { name: "Positions", description: "Master data jabatan pegawai" },
   ],
   paths: {
     "/api/auth/google": {
@@ -537,6 +539,204 @@ export const openApiDocument = {
         },
       },
     },
+    "/api/positions": {
+      get: {
+        tags: ["Positions"],
+        summary: "Ambil daftar master data jabatan pegawai",
+        responses: {
+          200: {
+            description: "Daftar jabatan pegawai",
+            content: {
+              "application/json": {
+                schema: {
+                  type: "array",
+                  items: { $ref: "#/components/schemas/PositionItem" },
+                },
+              },
+            },
+          },
+          500: { $ref: "#/components/responses/ServerError" },
+        },
+      },
+    },
+    "/api/users/check-username": {
+      get: {
+        tags: ["Users"],
+        summary: "Pemeriksaan ketersediaan username unik secara realtime",
+        parameters: [
+          { name: "username", in: "query", required: true, schema: { type: "string" }, example: "john_doe" },
+          { name: "excludeUserId", in: "query", required: false, schema: { type: "integer" } },
+        ],
+        responses: {
+          200: {
+            description: "Status ketersediaan username",
+            content: {
+              "application/json": {
+                schema: {
+                  type: "object",
+                  properties: {
+                    success: { type: "boolean", example: true },
+                    available: { type: "boolean", example: true },
+                    message: { type: "string", example: "Username tersedia." },
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
+    },
+    "/api/users": {
+      get: {
+        tags: ["Users"],
+        summary: "Daftar user pengguna aplikasi (hanya Superadmin)",
+        parameters: [
+          { name: "q", in: "query", required: false, schema: { type: "string" }, description: "Pencarian nama / username / pegawai" },
+          { name: "role_id", in: "query", required: false, schema: { type: "integer" } },
+          { name: "status", in: "query", required: false, schema: { type: "string", enum: ["active", "inactive"] } },
+        ],
+        responses: {
+          200: {
+            description: "Daftar user pengguna",
+            content: {
+              "application/json": {
+                schema: {
+                  type: "object",
+                  properties: {
+                    success: { type: "boolean", example: true },
+                    data: {
+                      type: "array",
+                      items: { $ref: "#/components/schemas/UserItem" },
+                    },
+                  },
+                },
+              },
+            },
+          },
+          401: { description: "Sesi tidak valid" },
+          403: { description: "Tidak memiliki hak akses kelola user" },
+          500: { $ref: "#/components/responses/ServerError" },
+        },
+      },
+      post: {
+        tags: ["Users"],
+        summary: "Buat akun user baru",
+        requestBody: {
+          required: true,
+          content: {
+            "application/json": {
+              schema: { $ref: "#/components/schemas/UserCreatePayload" },
+            },
+          },
+        },
+        responses: {
+          201: {
+            description: "User baru berhasil dibuat",
+            content: {
+              "application/json": {
+                schema: {
+                  type: "object",
+                  properties: {
+                    success: { type: "boolean", example: true },
+                    message: { type: "string", example: "User baru berhasil ditambahkan." },
+                    data: { $ref: "#/components/schemas/UserItem" },
+                  },
+                },
+              },
+            },
+          },
+          400: { description: "Validasi gagal (username duplikat/format salah/password tidak sesuai rule)" },
+          401: { description: "Sesi tidak valid" },
+          403: { description: "Tidak memiliki izin create user" },
+          500: { $ref: "#/components/responses/ServerError" },
+        },
+      },
+    },
+    "/api/users/{id}": {
+      get: {
+        tags: ["Users"],
+        summary: "Ambil detail user berdasarkan ID",
+        parameters: [
+          { name: "id", in: "path", required: true, schema: { type: "integer" }, example: 1 },
+        ],
+        responses: {
+          200: {
+            description: "Detail user",
+            content: {
+              "application/json": {
+                schema: {
+                  type: "object",
+                  properties: {
+                    success: { type: "boolean", example: true },
+                    data: { $ref: "#/components/schemas/UserItem" },
+                  },
+                },
+              },
+            },
+          },
+          404: { description: "User tidak ditemukan" },
+        },
+      },
+      put: {
+        tags: ["Users"],
+        summary: "Perbarui data user (nama, username, role, status, optional password)",
+        parameters: [
+          { name: "id", in: "path", required: true, schema: { type: "integer" }, example: 1 },
+        ],
+        requestBody: {
+          required: true,
+          content: {
+            "application/json": {
+              schema: { $ref: "#/components/schemas/UserUpdatePayload" },
+            },
+          },
+        },
+        responses: {
+          200: {
+            description: "User berhasil diperbarui",
+            content: {
+              "application/json": {
+                schema: {
+                  type: "object",
+                  properties: {
+                    success: { type: "boolean", example: true },
+                    message: { type: "string" },
+                    data: { $ref: "#/components/schemas/UserItem" },
+                  },
+                },
+              },
+            },
+          },
+          400: { description: "Data tidak valid" },
+          404: { description: "User tidak ditemukan" },
+        },
+      },
+      delete: {
+        tags: ["Users"],
+        summary: "Hapus (soft delete) akun user (kecuali akun diri sendiri)",
+        parameters: [
+          { name: "id", in: "path", required: true, schema: { type: "integer" }, example: 2 },
+        ],
+        responses: {
+          200: {
+            description: "User berhasil dihapus",
+            content: {
+              "application/json": {
+                schema: {
+                  type: "object",
+                  properties: {
+                    success: { type: "boolean", example: true },
+                    message: { type: "string" },
+                  },
+                },
+              },
+            },
+          },
+          400: { description: "Dilarang menghapus akun sendiri" },
+          404: { description: "User tidak ditemukan" },
+        },
+      },
+    },
   },
   components: {
     responses: {
@@ -754,6 +954,61 @@ export const openApiDocument = {
           read_scope: { type: "string", enum: ["all", "own", "no"], example: "all" },
           update_scope: { type: "string", enum: ["all", "own", "no"], example: "no" },
           delete_scope: { type: "string", enum: ["all", "own", "no"], example: "no" },
+        },
+      },
+      PositionItem: {
+        type: "object",
+        properties: {
+          id: { type: "integer", example: 1 },
+          code: { type: "string", example: "HR-OFFICER" },
+          name: { type: "string", example: "HR Officer" },
+          positionType: { type: "string", example: "staf" },
+        },
+      },
+      UserItem: {
+        type: "object",
+        properties: {
+          id: { type: "integer", example: 1 },
+          name: { type: "string", example: "Ahmad Hermawan" },
+          username: { type: "string", example: "ahmadhermawan" },
+          email: { type: "string", example: "ahmad@example.com", nullable: true },
+          cellphone: { type: "string", example: "081234567801", nullable: true },
+          status: { type: "string", enum: ["active", "inactive"], example: "active" },
+          role_id: { type: "integer", example: 2 },
+          role_code: { type: "string", example: "manager_hrd" },
+          role_name: { type: "string", example: "Manager HRD" },
+          employee_id: { type: "integer", example: 1, nullable: true },
+          employee_nip: { type: "string", example: "EMP-001", nullable: true },
+          employee_name: { type: "string", example: "Ahmad Hermawan", nullable: true },
+          position_id: { type: "integer", example: 2, nullable: true },
+          position_name: { type: "string", example: "HR Manager", nullable: true },
+          department_id: { type: "integer", example: 1, nullable: true },
+          department_name: { type: "string", example: "Human Resources", nullable: true },
+          created_at: { type: "string", format: "date-time" },
+          updated_at: { type: "string", format: "date-time" },
+        },
+      },
+      UserCreatePayload: {
+        type: "object",
+        required: ["name", "username", "password", "role_id"],
+        properties: {
+          name: { type: "string", example: "Ahmad Hermawan" },
+          username: { type: "string", example: "ahmadhermawan", description: "Min 6 char, lowercase alfanumerik tanpa spasi" },
+          password: { type: "string", example: "Rahasia#123", description: "Min 8 char, uppercase, lowercase, simbol" },
+          role_id: { type: "integer", example: 2 },
+          employee_id: { type: "integer", example: 1, nullable: true },
+          status: { type: "string", enum: ["active", "inactive"], default: "active" },
+        },
+      },
+      UserUpdatePayload: {
+        type: "object",
+        properties: {
+          name: { type: "string" },
+          username: { type: "string" },
+          password: { type: "string", description: "Kosongkan jika tidak ingin mengubah password" },
+          role_id: { type: "integer" },
+          employee_id: { type: "integer", nullable: true },
+          status: { type: "string", enum: ["active", "inactive"] },
         },
       },
       Error: {
