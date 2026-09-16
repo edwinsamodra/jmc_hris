@@ -9,6 +9,13 @@ export default defineNuxtConfig({
   devtools: { enabled: true },
 
   runtimeConfig: {
+    database: {
+      host: process.env.DB_HOST || "127.0.0.1",
+      port: Number(process.env.DB_PORT || 3306),
+      name: process.env.DB_NAME || "pj1",
+      user: process.env.DB_USER || "admin",
+      password: process.env.DB_PASSWORD || "",
+    },
     public: {
       appName: process.env.APP_NAME,
       appClient: process.env.APP_CLIENT,
