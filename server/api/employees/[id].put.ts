@@ -9,12 +9,10 @@ function parseDateInput(dateStr: any): string | null {
   if (!dateStr) return null;
   const str = String(dateStr).trim();
 
-  // If already YYYY-MM-DD
   if (/^\d{4}-\d{2}-\d{2}$/.test(str)) {
     return str;
   }
 
-  // If DD/MM/YYYY
   const ddmmyyyy = str.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);
   if (ddmmyyyy) {
     const day = ddmmyyyy[1].padStart(2, "0");
@@ -54,8 +52,36 @@ function saveBase64Image(dataUriOrBase64: string): string | null {
 }
 
 export default defineEventHandler(async (event) => {
-  // 1. RBAC check (Admin HRD has create permission, Manager HRD will get 403)
-  const auth = await requirePermission(event, "employee", "create");
+  // 1. RBAC check (Admin HRD has update permission, Manager HRD will get 403)
+  const auth = await requirePermission(event, "employee", "update");
+
+  const idOrNip = getRouterParam(event, "id");
+  if (!idOrNip) {
+    throw createError({
+      statusCode: 400,
+      statusMessage: "Bad Request",
+      message: "Parameter ID pegawai tidak valid.",
+    });
+  }
+
+  const isNumeric = /^\d+$/.test(idOrNip) && !idOrNip.startsWith("EMP-");
+
+  // Check if employee exists
+  const existingRows = await query<any>(
+    `SELECT * FROM employees WHERE (id = ? OR nip = ?) AND deleted_at IS NULL LIMIT 1`,
+    [isNumeric ? Number(idOrNip) : 0, idOrNip],
+  );
+
+  if (existingRows.length === 0) {
+    throw createError({
+      statusCode: 404,
+      statusMessage: "Not Found",
+      message: "Data pegawai tidak ditemukan atau sudah dihapus.",
+    });
+  }
+
+  const existingEmp = existingRows[0];
+  const targetEmployeeId = existingEmp.id;
 
   const body = await readBody(event);
   if (!body) {
@@ -66,30 +92,29 @@ export default defineEventHandler(async (event) => {
     });
   }
 
-  const nip = String(body.nip || "").trim();
-  const name = String(body.name || body.nama || "").trim();
-  const email = String(body.email || "").trim().toLowerCase();
-  const phone = String(body.phone || body.nomor_hp || "").trim();
-  const birthPlace = String(body.birth_place || body.tempat_lahir || "").trim();
-  const birthDateRaw = body.birth_date || body.tanggal_lahir;
+  const nip = String(body.nip !== undefined ? body.nip : existingEmp.nip).trim();
+  const name = String(body.name || body.nama || existingEmp.name).trim();
+  const email = String(body.email || existingEmp.email).trim().toLowerCase();
+  const phone = String(body.phone || body.nomor_hp || existingEmp.phone).trim();
+  const birthPlace = String(body.birth_place || body.tempat_lahir || existingEmp.birth_place).trim();
+  const birthDateRaw = body.birth_date !== undefined ? body.birth_date : (body.tanggal_lahir || existingEmp.birth_date);
   const birthDate = parseDateInput(birthDateRaw);
-  const maritalStatus = String(body.marital_status || body.status_kawin || "Belum Menikah").trim();
-  const childrenCount = Number(body.children_count !== undefined ? body.children_count : body.jumlah_anak || 0);
-  const joinedAtRaw = body.joined_at || body.tanggal_masuk;
+  const maritalStatus = String(body.marital_status || body.status_kawin || existingEmp.marital_status || "Belum Menikah").trim();
+  const childrenCount = Number(body.children_count !== undefined ? body.children_count : (body.jumlah_anak !== undefined ? body.jumlah_anak : existingEmp.children_count));
+  const joinedAtRaw = body.joined_at !== undefined ? body.joined_at : (body.tanggal_masuk || existingEmp.joined_at);
   const joinedAt = parseDateInput(joinedAtRaw);
-  const positionId = Number(body.position_id || body.jabatan_id || 0);
-  const departmentId = Number(body.department_id || body.departemen_id || 0);
-  const employmentType = String(body.employment_type || body.status_kontrak || "pkwtt").trim().toLowerCase();
-  const districtId = Number(body.district_id || body.kecamatan_id || 0);
-  const fullAddress = String(body.full_address || body.alamat_lengkap || "").trim();
-  const distanceKm = Number(body.distance_km !== undefined ? body.distance_km : body.jarak_kantor || 0);
-  const status = String(body.status || "active").trim().toLowerCase() === "inactive" ? "inactive" : "active";
-  const gender = String(body.gender || "Laki-laki").trim();
-  const educations = Array.isArray(body.educations || body.pendidikan) ? (body.educations || body.pendidikan) : [];
-  const photo = body.photo || body.foto;
+  const positionId = Number(body.position_id || body.jabatan_id || existingEmp.position_id);
+  const departmentId = Number(body.department_id || body.departemen_id || existingEmp.department_id);
+  const employmentType = String(body.employment_type || body.status_kontrak || existingEmp.employment_type || "pkwtt").trim().toLowerCase();
+  const districtId = Number(body.district_id || body.kecamatan_id || existingEmp.district_id);
+  const fullAddress = String(body.full_address || body.alamat_lengkap || existingEmp.full_address).trim();
+  const distanceKm = Number(body.distance_km !== undefined ? body.distance_km : (body.jarak_kantor !== undefined ? body.jarak_kantor : existingEmp.distance_km));
+  const status = String(body.status || existingEmp.status || "active").trim().toLowerCase() === "inactive" ? "inactive" : "active";
+  const gender = String(body.gender || existingEmp.gender || "Laki-laki").trim();
+  const educations = Array.isArray(body.educations || body.pendidikan) ? (body.educations || body.pendidikan) : null;
+  const photo = body.photo !== undefined ? body.photo : body.foto;
 
-  // --- VALIDATION RULES (sesuai spesifikasi) ---
-  // 1. NIP: Minimal 8 digit, angka saja, tidak boleh spasi
+  // --- VALIDATION RULES ---
   if (!nip || !/^\d{8,}$/.test(nip)) {
     throw createError({
       statusCode: 422,
@@ -98,7 +123,6 @@ export default defineEventHandler(async (event) => {
     });
   }
 
-  // 2. Nama: Hanya boleh huruf, angka, tanda petik atas (‘ / '), dan spasi
   if (!name || !/^[a-zA-Z0-9\s'’`]+$/.test(name)) {
     throw createError({
       statusCode: 422,
@@ -107,7 +131,6 @@ export default defineEventHandler(async (event) => {
     });
   }
 
-  // 3. Email: Aturan umum email
   if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
     throw createError({
       statusCode: 422,
@@ -116,7 +139,6 @@ export default defineEventHandler(async (event) => {
     });
   }
 
-  // 4. Nomor HP: Format internasional, misal +6282218458888
   if (!phone || !/^\+[0-9]{8,15}$/.test(phone)) {
     throw createError({
       statusCode: 422,
@@ -125,7 +147,6 @@ export default defineEventHandler(async (event) => {
     });
   }
 
-  // 5. Tempat lahir
   if (!birthPlace) {
     throw createError({
       statusCode: 422,
@@ -134,25 +155,22 @@ export default defineEventHandler(async (event) => {
     });
   }
 
-  // 6. Tanggal lahir
   if (!birthDate) {
     throw createError({
       statusCode: 422,
       statusMessage: "Unprocessable Entity",
-      message: "Format tanggal lahir tidak valid (gunakan DD/MM/YYYY atau YYYY-MM-DD).",
+      message: "Format tanggal lahir tidak valid.",
     });
   }
 
-  // 7. Tanggal masuk
   if (!joinedAt) {
     throw createError({
       statusCode: 422,
       statusMessage: "Unprocessable Entity",
-      message: "Format tanggal masuk tidak valid (gunakan DD/MM/YYYY atau YYYY-MM-DD).",
+      message: "Format tanggal masuk tidak valid.",
     });
   }
 
-  // 8. Jarak Rumah - Kantor: Maksimal 2 digit (0 - 99)
   if (isNaN(distanceKm) || distanceKm < 0 || distanceKm > 99) {
     throw createError({
       statusCode: 422,
@@ -161,7 +179,6 @@ export default defineEventHandler(async (event) => {
     });
   }
 
-  // 9. Jumlah Anak: Maksimal 2 digit (0 - 99)
   if (isNaN(childrenCount) || childrenCount < 0 || childrenCount > 99) {
     throw createError({
       statusCode: 422,
@@ -170,7 +187,6 @@ export default defineEventHandler(async (event) => {
     });
   }
 
-  // 10. Jabatan & Departemen & Kecamatan
   if (!positionId) {
     throw createError({
       statusCode: 422,
@@ -203,8 +219,8 @@ export default defineEventHandler(async (event) => {
     });
   }
 
-  // 11. Validasi Riwayat Pendidikan
-  if (educations.length > 0) {
+  // Validasi Riwayat Pendidikan jika diberikan
+  if (educations !== null && educations.length > 0) {
     for (let i = 0; i < educations.length; i++) {
       const edu = educations[i];
       const level = String(edu.education_level || edu.jenjang || "").trim();
@@ -237,53 +253,67 @@ export default defineEventHandler(async (event) => {
     }
   }
 
-  // Cek keunikan NIP
-  const existingNip = await query<any>(
-    "SELECT id FROM employees WHERE nip = ? AND deleted_at IS NULL LIMIT 1",
-    [nip],
+  // Cek keunikan NIP jika berubah
+  const dupNip = await query<any>(
+    "SELECT id FROM employees WHERE nip = ? AND id != ? AND deleted_at IS NULL LIMIT 1",
+    [nip, targetEmployeeId],
   );
-  if (existingNip.length > 0) {
+  if (dupNip.length > 0) {
     throw createError({
       statusCode: 409,
       statusMessage: "Conflict",
-      message: `Pegawai dengan NIP '${nip}' sudah terdaftar.`,
+      message: `NIP '${nip}' sudah digunakan oleh pegawai lain.`,
     });
   }
 
-  // Cek keunikan Email
-  const existingEmail = await query<any>(
-    "SELECT id FROM employees WHERE email = ? AND deleted_at IS NULL LIMIT 1",
-    [email],
+  // Cek keunikan Email jika berubah
+  const dupEmail = await query<any>(
+    "SELECT id FROM employees WHERE email = ? AND id != ? AND deleted_at IS NULL LIMIT 1",
+    [email, targetEmployeeId],
   );
-  if (existingEmail.length > 0) {
+  if (dupEmail.length > 0) {
     throw createError({
       statusCode: 409,
       statusMessage: "Conflict",
-      message: `Pegawai dengan email '${email}' sudah terdaftar.`,
+      message: `Email '${email}' sudah digunakan oleh pegawai lain.`,
     });
   }
 
-  // Process photo upload if base64 provided
-  let photoPath: string | null = null;
+  // Process photo
+  let photoPath = existingEmp.photo_path;
   if (typeof photo === "string" && photo.startsWith("data:image/")) {
     photoPath = saveBase64Image(photo);
-  } else if (typeof photo === "string" && photo.startsWith("/")) {
+  } else if (typeof photo === "string") {
     photoPath = photo;
   }
 
-  // Valid status perkawinan formatting
   const formattedMaritalStatus = maritalStatus.toLowerCase().includes("tidak") || maritalStatus.toLowerCase().includes("belum")
     ? "Belum Menikah"
     : "Menikah";
 
-  // Insert employee
-  const result = await execute(
-    `INSERT INTO employees (
-       nip, name, email, phone, photo_path, birth_place, birth_date,
-       marital_status, children_count, joined_at, position_id, department_id,
-       employment_type, gender, distance_km, district_id, full_address, status,
-       created_by
-     ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+  // Update employee record
+  await execute(
+    `UPDATE employees SET
+       nip = ?,
+       name = ?,
+       email = ?,
+       phone = ?,
+       photo_path = ?,
+       birth_place = ?,
+       birth_date = ?,
+       marital_status = ?,
+       children_count = ?,
+       joined_at = ?,
+       position_id = ?,
+       department_id = ?,
+       employment_type = ?,
+       gender = ?,
+       distance_km = ?,
+       district_id = ?,
+       full_address = ?,
+       status = ?,
+       updated_by = ?
+     WHERE id = ?`,
     [
       nip,
       name,
@@ -304,13 +334,13 @@ export default defineEventHandler(async (event) => {
       fullAddress,
       status,
       auth.sessionUser.id,
+      targetEmployeeId,
     ],
   );
 
-  const newEmployeeId = result.insertId;
-
-  // Insert Educations
-  if (educations.length > 0) {
+  // Sync educations if provided
+  if (educations !== null) {
+    await execute("DELETE FROM employee_educations WHERE employee_id = ?", [targetEmployeeId]);
     for (let i = 0; i < educations.length; i++) {
       const edu = educations[i];
       const level = String(edu.education_level || edu.jenjang || "").trim();
@@ -322,7 +352,7 @@ export default defineEventHandler(async (event) => {
           `INSERT INTO employee_educations (
              employee_id, education_level, school_name, graduation_year, sort_order
            ) VALUES (?, ?, ?, ?, ?)`,
-          [newEmployeeId, level || "-", school || "-", gradYear || null, i + 1],
+          [targetEmployeeId, level || "-", school || "-", gradYear || null, i + 1],
         );
       }
     }
@@ -332,12 +362,20 @@ export default defineEventHandler(async (event) => {
   await logActivity(event, {
     userId: auth.sessionUser.id,
     moduleCode: "employee",
-    action: "create",
-    description: `Menambahkan data pegawai '${name}' (NIP: ${nip})`,
+    action: "update",
+    description: `Mengubah data pegawai '${name}' (NIP: ${nip}, ID: ${targetEmployeeId})`,
     subjectType: "employees",
-    subjectId: newEmployeeId,
+    subjectId: targetEmployeeId,
+    oldValues: {
+      nip: existingEmp.nip,
+      name: existingEmp.name,
+      email: existingEmp.email,
+      phone: existingEmp.phone,
+      position_id: existingEmp.position_id,
+      department_id: existingEmp.department_id,
+      status: existingEmp.status,
+    },
     newValues: {
-      id: newEmployeeId,
       nip,
       name,
       email,
@@ -345,15 +383,14 @@ export default defineEventHandler(async (event) => {
       position_id: positionId,
       department_id: departmentId,
       status,
-      employment_type: employmentType,
     },
   });
 
   return {
     success: true,
-    message: `Data pegawai '${name}' (NIP: ${nip}) berhasil ditambahkan.`,
+    message: `Data pegawai '${name}' berhasil diperbarui.`,
     data: {
-      id: newEmployeeId,
+      id: targetEmployeeId,
       nip,
       name,
       email,
