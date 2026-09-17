@@ -17,6 +17,8 @@ export const openApiDocument = {
     { name: "Roles", description: "Manajemen data role dan hak akses modul (RBAC)" },
     { name: "Users", description: "Manajemen data user pengguna sistem" },
     { name: "Positions", description: "Master data jabatan pegawai" },
+    { name: "Transport Allowance", description: "Modul Tunjangan Transport: Rekapitulasi periode, detail penerima sortable, dan trigger kalkulasi sistem" },
+    { name: "Transport Settings", description: "Setting Tunjangan Transport: Pengaturan base fare, tanggal berlaku mulai, batas min/max km, dan syarat hari kerja" },
   ],
   paths: {
     "/api/auth/google": {
@@ -1098,6 +1100,225 @@ export const openApiDocument = {
           },
           400: { description: "Dilarang menghapus akun sendiri" },
           404: { description: "User tidak ditemukan" },
+        },
+      },
+    },
+    "/api/transport/settings": {
+      get: {
+        tags: ["Transport Settings"],
+        summary: "Ambil konfigurasi setting tarif tunjangan transport aktif",
+        responses: {
+          200: {
+            description: "Data setting aktif berhasil diambil",
+            content: {
+              "application/json": {
+                schema: {
+                  type: "object",
+                  properties: {
+                    success: { type: "boolean", example: true },
+                    data: {
+                      type: "object",
+                      nullable: true,
+                      properties: {
+                        id: { type: "integer", example: 1 },
+                        base_fare: { type: "number", example: 5000 },
+                        effective_start: { type: "string", format: "date", example: "2026-01-01" },
+                        min_km: { type: "number", example: 5 },
+                        max_km: { type: "number", example: 25 },
+                        min_work_days: { type: "integer", example: 19 },
+                        is_active: { type: "boolean", example: true },
+                        created_at: { type: "string", format: "date-time" },
+                        updated_at: { type: "string", format: "date-time" },
+                      },
+                    },
+                  },
+                },
+              },
+            },
+          },
+          403: { description: "Forbidden - Tidak memiliki hak akses" },
+        },
+      },
+      post: {
+        tags: ["Transport Settings"],
+        summary: "Simpan konfigurasi baru setting tarif tunjangan transport",
+        requestBody: {
+          required: true,
+          content: {
+            "application/json": {
+              schema: {
+                type: "object",
+                required: ["base_fare", "effective_start"],
+                properties: {
+                  base_fare: { type: "number", example: 5000, description: "Tarif rupiah per kilometer" },
+                  effective_start: { type: "string", format: "date", example: "2026-01-01" },
+                  min_km: { type: "number", example: 5, default: 5 },
+                  max_km: { type: "number", example: 25, default: 25 },
+                  min_work_days: { type: "integer", example: 19, default: 19 },
+                },
+              },
+            },
+          },
+        },
+        responses: {
+          200: {
+            description: "Pengaturan berhasil disimpan",
+            content: {
+              "application/json": {
+                schema: {
+                  type: "object",
+                  properties: {
+                    success: { type: "boolean", example: true },
+                    message: { type: "string" },
+                    data: { type: "object" },
+                  },
+                },
+              },
+            },
+          },
+          422: { description: "Data tidak valid" },
+          403: { description: "Forbidden" },
+        },
+      },
+    },
+    "/api/transport/periods": {
+      get: {
+        tags: ["Transport Allowance"],
+        summary: "Ambil daftar rekapitulasi periode tunjangan transport bulanan",
+        parameters: [
+          { name: "year", in: "query", required: false, schema: { type: "integer", example: 2026 } },
+          { name: "search", in: "query", required: false, schema: { type: "string" } },
+          { name: "page", in: "query", required: false, schema: { type: "integer", default: 1 } },
+          { name: "limit", in: "query", required: false, schema: { type: "integer", default: 12 } },
+        ],
+        responses: {
+          200: {
+            description: "Daftar periode berhasil diambil",
+            content: {
+              "application/json": {
+                schema: {
+                  type: "object",
+                  properties: {
+                    success: { type: "boolean", example: true },
+                    data: {
+                      type: "array",
+                      items: {
+                        type: "object",
+                        properties: {
+                          id: { type: "integer", example: 1 },
+                          period_year: { type: "integer", example: 2026 },
+                          period_month: { type: "integer", example: 8 },
+                          month_name: { type: "string", example: "Agustus" },
+                          period_label: { type: "string", example: "Agustus 2026" },
+                          total_recipients: { type: "integer", example: 1 },
+                          total_amount: { type: "number", example: 945000 },
+                          status: { type: "string", enum: ["draft", "calculated", "locked"], example: "calculated" },
+                        },
+                      },
+                    },
+                    meta: {
+                      type: "object",
+                      properties: {
+                        total: { type: "integer" },
+                        page: { type: "integer" },
+                        limit: { type: "integer" },
+                        total_pages: { type: "integer" },
+                        available_years: { type: "array", items: { type: "integer" } },
+                      },
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
+    },
+    "/api/transport/periods/{id}": {
+      get: {
+        tags: ["Transport Allowance"],
+        summary: "Ambil detail periode dan daftar hasil perhitungan tunjangan transport penerima",
+        parameters: [
+          { name: "id", in: "path", required: true, schema: { type: "integer" } },
+          { name: "search", in: "query", required: false, schema: { type: "string" } },
+          { name: "sort_by", in: "query", required: false, schema: { type: "string", enum: ["name", "km", "hari", "nominal"], default: "name" } },
+          { name: "sort_dir", in: "query", required: false, schema: { type: "string", enum: ["asc", "desc"], default: "asc" } },
+          { name: "page", in: "query", required: false, schema: { type: "integer", default: 1 } },
+          { name: "limit", in: "query", required: false, schema: { type: "integer", default: 20 } },
+        ],
+        responses: {
+          200: {
+            description: "Detail periode dan list penerima",
+            content: {
+              "application/json": {
+                schema: {
+                  type: "object",
+                  properties: {
+                    success: { type: "boolean", example: true },
+                    data: {
+                      type: "object",
+                      properties: {
+                        period: { type: "object" },
+                        recipients: {
+                          type: "array",
+                          items: {
+                            type: "object",
+                            properties: {
+                              no: { type: "integer" },
+                              id: { type: "integer" },
+                              nip: { type: "string", example: "EMP-001" },
+                              name: { type: "string", example: "Ahmad Hermawan" },
+                              km: { type: "number", example: 9 },
+                              hari: { type: "integer", example: 21 },
+                              nominal: { type: "number", example: 945000 },
+                              eligibility_status: { type: "string", example: "eligible" },
+                            },
+                          },
+                        },
+                      },
+                    },
+                    meta: { type: "object" },
+                  },
+                },
+              },
+            },
+          },
+          404: { description: "Periode tidak ditemukan" },
+        },
+      },
+    },
+    "/api/transport/periods/{id}/calculate": {
+      post: {
+        tags: ["Transport Allowance"],
+        summary: "Memicu kalkulasi tunjangan transport otomatis untuk seluruh pegawai tetap di periode tersebut",
+        parameters: [
+          { name: "id", in: "path", required: true, schema: { type: "integer" } },
+        ],
+        responses: {
+          200: {
+            description: "Perhitungan berhasil diselesaikan",
+            content: {
+              "application/json": {
+                schema: {
+                  type: "object",
+                  properties: {
+                    success: { type: "boolean", example: true },
+                    message: { type: "string" },
+                    data: {
+                      type: "object",
+                      properties: {
+                        period_id: { type: "integer" },
+                        total_recipients: { type: "integer" },
+                        total_amount: { type: "number" },
+                      },
+                    },
+                  },
+                },
+              },
+            },
+          },
+          403: { description: "Forbidden" },
+          404: { description: "Periode tidak ditemukan" },
         },
       },
     },

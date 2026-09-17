@@ -6,7 +6,7 @@ function getPool() {
   if (!pool) {
     let dbHost = process.env.DB_HOST || "127.0.0.1";
     let dbPort = Number(process.env.DB_PORT || 3306);
-    let dbName = process.env.DB_NAME || "pj1";
+    let dbName = process.env.DB_NAME || "jmc_hris";
     let dbUser = process.env.DB_USER || "admin";
     let dbPassword = process.env.DB_PASSWORD || "jamurkembang";
 

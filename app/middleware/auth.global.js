@@ -4,6 +4,7 @@ const ROUTE_MODULE_MAP = [
   { prefix: "/presensi", module: "attendance" },
   { prefix: "/tunjangan/setting", module: "transport_setting" },
   { prefix: "/tunjangan/transport", module: "transport_allowance" },
+  { prefix: "/tunjangan", module: "transport_allowance" },
   { prefix: "/user/role", module: "role" },
   { prefix: "/user/manage", module: "user" },
   { prefix: "/user", module: "user" },

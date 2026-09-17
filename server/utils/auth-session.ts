@@ -254,10 +254,12 @@ export async function getAuthenticatedSession(
 export async function logActivity(
   event: H3Event,
   params: {
-    userId: number | null;
-    moduleCode: string;
+    userId?: number | null;
+    moduleCode?: string;
+    module?: string;
     action: "login" | "logout" | "create" | "read" | "update" | "delete";
-    description: string;
+    description?: string;
+    details?: string;
     subjectType?: string;
     subjectId?: number | null;
     oldValues?: Record<string, unknown> | null;
@@ -270,6 +272,20 @@ export async function logActivity(
     const url = event.node.req.url || "";
     const method = event.node.req.method || "";
 
+    // Dapatkan userId jika belum dipassing secara eksplisit
+    let userId = params.userId;
+    if (userId === undefined) {
+      try {
+        const session = await getAuthenticatedSession(event, { required: false });
+        userId = session?.user?.id ?? null;
+      } catch {
+        userId = null;
+      }
+    }
+
+    const moduleCode = params.moduleCode || params.module || "system";
+    const description = params.description || params.details || "";
+
     await execute(
       `INSERT INTO activity_logs (
         user_id, module_code, action, description,
@@ -277,10 +293,10 @@ export async function logActivity(
         old_values, new_values, url, method, created_at
       ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW())`,
       [
-        params.userId,
-        params.moduleCode,
+        userId,
+        moduleCode,
         params.action,
-        params.description,
+        description,
         params.subjectType || null,
         params.subjectId || null,
         ip,

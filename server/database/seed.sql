@@ -203,23 +203,23 @@ ON DUPLICATE KEY UPDATE
   delete_scope = VALUES(delete_scope);
 
 -- Permissions: Admin HRD
--- Matrix: Login(Y), Role(-), User(-), Profile(RO,UO), Dashboard(R), Pegawai(CRUD), Presensi(CRUD), Tunjangan(RO), Setting(CRUD), Log(-)
+-- Matrix: Login(Y), Role(-), User(-), Profile(RO,UO), Dashboard(R), Pegawai(CRUD), Presensi(CRUD), Tunjangan(CRUD), Setting(CRUD), Log(-)
 INSERT INTO role_permissions (role_id, module_id, can_access, can_create, read_scope, update_scope, delete_scope)
 SELECT r.id, m.id,
   CASE WHEN m.code IN ('auth', 'profile', 'dashboard', 'employee', 'attendance', 'transport_allowance', 'transport_setting') THEN 1 ELSE 0 END,
-  CASE WHEN m.code IN ('employee', 'attendance', 'transport_setting') THEN 1 ELSE 0 END,
+  CASE WHEN m.code IN ('employee', 'attendance', 'transport_allowance', 'transport_setting') THEN 1 ELSE 0 END,
   CASE
-    WHEN m.code IN ('dashboard', 'employee', 'attendance', 'transport_setting') THEN 'all'
-    WHEN m.code IN ('profile', 'transport_allowance') THEN 'own'
-    ELSE 'no'
-  END,
-  CASE
-    WHEN m.code IN ('employee', 'attendance', 'transport_setting') THEN 'all'
+    WHEN m.code IN ('dashboard', 'employee', 'attendance', 'transport_allowance', 'transport_setting') THEN 'all'
     WHEN m.code IN ('profile') THEN 'own'
     ELSE 'no'
   END,
   CASE
-    WHEN m.code IN ('employee', 'attendance', 'transport_setting') THEN 'all'
+    WHEN m.code IN ('employee', 'attendance', 'transport_allowance', 'transport_setting') THEN 'all'
+    WHEN m.code IN ('profile') THEN 'own'
+    ELSE 'no'
+  END,
+  CASE
+    WHEN m.code IN ('employee', 'attendance', 'transport_allowance', 'transport_setting') THEN 'all'
     ELSE 'no'
   END
 FROM roles r
@@ -277,7 +277,7 @@ INSERT INTO employees (
   ('EMP-007', 'Shani Ratnasari', 'shani.ratna@example.com', '+6281234567807',
    'Surabaya', '1992-05-18', 'Menikah', 2, '2019-11-01',
    (SELECT id FROM positions WHERE code = 'PRODUCTION-MANAGER'),
-   (SELECT id FROM departments WHERE code = 'PROD'), 'pkwtt', 'Perempuan', 12.00,
+   (SELECT id FROM departments WHERE code = 'PROD'), 'pkwtt', 'Perempuan', 28.00,
    (SELECT id FROM districts WHERE code = '3471010'), 'Jl. Danurejan No. 15, Yogyakarta', 'active'),
 
   ('EMP-008', 'Reza Dewanto', 'reza.dewanto@example.com', '+6281234567808',
@@ -387,9 +387,24 @@ INSERT INTO employees (
    (SELECT id FROM positions WHERE code = 'SOFTWARE-ENGINEER'),
    (SELECT id FROM departments WHERE code = 'ENG'), 'pkwtt', 'Laki-laki', 6.50,
    (SELECT id FROM districts WHERE code = '3471070'), 'Jl. DI Panjaitan, Mantrijeron', 'inactive')
-ON DUPLICATE KEY UPDATE name = VALUES(name), email = VALUES(email),
-  position_id = VALUES(position_id), department_id = VALUES(department_id),
-  employment_type = VALUES(employment_type), status = VALUES(status);
+ON DUPLICATE KEY UPDATE
+  name = VALUES(name),
+  email = VALUES(email),
+  phone = VALUES(phone),
+  birth_place = VALUES(birth_place),
+  birth_date = VALUES(birth_date),
+  marital_status = VALUES(marital_status),
+  children_count = VALUES(children_count),
+  joined_at = VALUES(joined_at),
+  position_id = VALUES(position_id),
+  department_id = VALUES(department_id),
+  employment_type = VALUES(employment_type),
+  gender = VALUES(gender),
+  distance_km = VALUES(distance_km),
+  district_id = VALUES(district_id),
+  full_address = VALUES(full_address),
+  status = VALUES(status),
+  deleted_at = NULL;
 
 -- Master Riwayat Pendidikan Pegawai
 INSERT INTO employee_educations (employee_id, education_level, school_name, graduation_year, sort_order)
@@ -570,11 +585,246 @@ INSERT INTO attendance_summaries (
   hadir, cuti, kuota_cuti, izin, kuota_izin,
   unpaid_leave, kuota_unpaid_leave, status_hadir, calculated_at
 ) VALUES
-  -- Periode Agustus 2026 (N-1)
-  ((SELECT id FROM employees WHERE nip = 'EMP-001'), 2026, 8, 21, 0, 12, 0, 3, 0, 5, 'Terpenuhi', NOW()),
+  ((SELECT id FROM employees WHERE nip = 'EMP-001'), 2025, 11, 20, 1, 12, 0, 3, 0, 5, 'Terpenuhi', NOW()),
+  ((SELECT id FROM employees WHERE nip = 'EMP-002'), 2025, 11, 20, 1, 12, 0, 3, 0, 5, 'Terpenuhi', NOW()),
+  ((SELECT id FROM employees WHERE nip = 'EMP-003'), 2025, 11, 18, 1, 12, 0, 3, 0, 5, 'Tidak terpenuhi', NOW()),
+  ((SELECT id FROM employees WHERE nip = 'EMP-004'), 2025, 11, 20, 1, 12, 0, 3, 0, 5, 'Terpenuhi', NOW()),
+  ((SELECT id FROM employees WHERE nip = 'EMP-005'), 2025, 11, 22, 0, 12, 0, 3, 0, 5, 'Terpenuhi', NOW()),
+  ((SELECT id FROM employees WHERE nip = 'EMP-006'), 2025, 11, 20, 1, 12, 0, 3, 0, 5, 'Terpenuhi', NOW()),
+  ((SELECT id FROM employees WHERE nip = 'EMP-007'), 2025, 11, 21, 1, 12, 0, 3, 0, 5, 'Terpenuhi', NOW()),
+  ((SELECT id FROM employees WHERE nip = 'EMP-008'), 2025, 11, 20, 1, 12, 0, 3, 0, 5, 'Terpenuhi', NOW()),
+  ((SELECT id FROM employees WHERE nip = 'EMP-009'), 2025, 11, 21, 1, 12, 0, 3, 0, 5, 'Terpenuhi', NOW()),
+  ((SELECT id FROM employees WHERE nip = 'EMP-010'), 2025, 11, 19, 1, 12, 0, 3, 0, 5, 'Terpenuhi', NOW()),
+  ((SELECT id FROM employees WHERE nip = 'EMP-011'), 2025, 11, 21, 1, 12, 0, 3, 0, 5, 'Terpenuhi', NOW()),
+  ((SELECT id FROM employees WHERE nip = 'EMP-012'), 2025, 11, 20, 1, 12, 0, 3, 0, 5, 'Terpenuhi', NOW()),
+  ((SELECT id FROM employees WHERE nip = 'EMP-013'), 2025, 11, 21, 1, 12, 0, 3, 0, 5, 'Terpenuhi', NOW()),
+  ((SELECT id FROM employees WHERE nip = 'EMP-014'), 2025, 11, 19, 1, 12, 0, 3, 0, 5, 'Terpenuhi', NOW()),
+  ((SELECT id FROM employees WHERE nip = 'EMP-015'), 2025, 11, 22, 0, 12, 0, 3, 0, 5, 'Terpenuhi', NOW()),
+  ((SELECT id FROM employees WHERE nip = 'EMP-016'), 2025, 11, 16, 1, 12, 2, 3, 0, 5, 'Tidak terpenuhi', NOW()),
+  ((SELECT id FROM employees WHERE nip = 'EMP-017'), 2025, 11, 21, 1, 12, 0, 3, 0, 5, 'Terpenuhi', NOW()),
+  ((SELECT id FROM employees WHERE nip = 'EMP-018'), 2025, 11, 20, 1, 12, 0, 3, 0, 5, 'Terpenuhi', NOW()),
+  ((SELECT id FROM employees WHERE nip = 'EMP-019'), 2025, 11, 21, 1, 12, 0, 3, 0, 5, 'Terpenuhi', NOW()),
+  ((SELECT id FROM employees WHERE nip = 'EMP-020'), 2025, 11, 20, 1, 12, 0, 3, 0, 5, 'Terpenuhi', NOW()),
+  ((SELECT id FROM employees WHERE nip = 'EMP-021'), 2025, 11, 20, 1, 12, 0, 3, 0, 5, 'Terpenuhi', NOW()),
+  ((SELECT id FROM employees WHERE nip = 'EMP-022'), 2025, 11, 20, 1, 12, 0, 3, 0, 5, 'Terpenuhi', NOW()),
+  ((SELECT id FROM employees WHERE nip = 'EMP-023'), 2025, 11, 21, 1, 12, 0, 3, 0, 5, 'Terpenuhi', NOW()),
+  ((SELECT id FROM employees WHERE nip = 'EMP-024'), 2025, 11, 20, 1, 12, 0, 3, 0, 5, 'Terpenuhi', NOW()),
+  ((SELECT id FROM employees WHERE nip = 'EMP-001'), 2025, 12, 21, 1, 12, 0, 3, 0, 5, 'Terpenuhi', NOW()),
+  ((SELECT id FROM employees WHERE nip = 'EMP-002'), 2025, 12, 20, 1, 12, 0, 3, 0, 5, 'Terpenuhi', NOW()),
+  ((SELECT id FROM employees WHERE nip = 'EMP-003'), 2025, 12, 18, 1, 12, 0, 3, 0, 5, 'Tidak terpenuhi', NOW()),
+  ((SELECT id FROM employees WHERE nip = 'EMP-004'), 2025, 12, 21, 1, 12, 0, 3, 0, 5, 'Terpenuhi', NOW()),
+  ((SELECT id FROM employees WHERE nip = 'EMP-005'), 2025, 12, 22, 0, 12, 0, 3, 0, 5, 'Terpenuhi', NOW()),
+  ((SELECT id FROM employees WHERE nip = 'EMP-006'), 2025, 12, 20, 1, 12, 0, 3, 0, 5, 'Terpenuhi', NOW()),
+  ((SELECT id FROM employees WHERE nip = 'EMP-007'), 2025, 12, 22, 0, 12, 0, 3, 0, 5, 'Terpenuhi', NOW()),
+  ((SELECT id FROM employees WHERE nip = 'EMP-008'), 2025, 12, 20, 1, 12, 0, 3, 0, 5, 'Terpenuhi', NOW()),
+  ((SELECT id FROM employees WHERE nip = 'EMP-009'), 2025, 12, 21, 1, 12, 0, 3, 0, 5, 'Terpenuhi', NOW()),
+  ((SELECT id FROM employees WHERE nip = 'EMP-010'), 2025, 12, 19, 1, 12, 0, 3, 0, 5, 'Terpenuhi', NOW()),
+  ((SELECT id FROM employees WHERE nip = 'EMP-011'), 2025, 12, 21, 1, 12, 0, 3, 0, 5, 'Terpenuhi', NOW()),
+  ((SELECT id FROM employees WHERE nip = 'EMP-012'), 2025, 12, 20, 1, 12, 0, 3, 0, 5, 'Terpenuhi', NOW()),
+  ((SELECT id FROM employees WHERE nip = 'EMP-013'), 2025, 12, 20, 1, 12, 0, 3, 0, 5, 'Terpenuhi', NOW()),
+  ((SELECT id FROM employees WHERE nip = 'EMP-014'), 2025, 12, 20, 1, 12, 0, 3, 0, 5, 'Terpenuhi', NOW()),
+  ((SELECT id FROM employees WHERE nip = 'EMP-015'), 2025, 12, 22, 0, 12, 0, 3, 0, 5, 'Terpenuhi', NOW()),
+  ((SELECT id FROM employees WHERE nip = 'EMP-016'), 2025, 12, 15, 1, 12, 2, 3, 0, 5, 'Tidak terpenuhi', NOW()),
+  ((SELECT id FROM employees WHERE nip = 'EMP-017'), 2025, 12, 21, 1, 12, 0, 3, 0, 5, 'Terpenuhi', NOW()),
+  ((SELECT id FROM employees WHERE nip = 'EMP-018'), 2025, 12, 20, 1, 12, 0, 3, 0, 5, 'Terpenuhi', NOW()),
+  ((SELECT id FROM employees WHERE nip = 'EMP-019'), 2025, 12, 22, 0, 12, 0, 3, 0, 5, 'Terpenuhi', NOW()),
+  ((SELECT id FROM employees WHERE nip = 'EMP-020'), 2025, 12, 21, 1, 12, 0, 3, 0, 5, 'Terpenuhi', NOW()),
+  ((SELECT id FROM employees WHERE nip = 'EMP-021'), 2025, 12, 20, 1, 12, 0, 3, 0, 5, 'Terpenuhi', NOW()),
+  ((SELECT id FROM employees WHERE nip = 'EMP-022'), 2025, 12, 21, 1, 12, 0, 3, 0, 5, 'Terpenuhi', NOW()),
+  ((SELECT id FROM employees WHERE nip = 'EMP-023'), 2025, 12, 21, 1, 12, 0, 3, 0, 5, 'Terpenuhi', NOW()),
+  ((SELECT id FROM employees WHERE nip = 'EMP-024'), 2025, 12, 20, 1, 12, 0, 3, 0, 5, 'Terpenuhi', NOW()),
+  ((SELECT id FROM employees WHERE nip = 'EMP-001'), 2026, 1, 21, 1, 12, 0, 3, 0, 5, 'Terpenuhi', NOW()),
+  ((SELECT id FROM employees WHERE nip = 'EMP-002'), 2026, 1, 20, 1, 12, 0, 3, 0, 5, 'Terpenuhi', NOW()),
+  ((SELECT id FROM employees WHERE nip = 'EMP-003'), 2026, 1, 18, 1, 12, 0, 3, 0, 5, 'Tidak terpenuhi', NOW()),
+  ((SELECT id FROM employees WHERE nip = 'EMP-004'), 2026, 1, 21, 1, 12, 0, 3, 0, 5, 'Terpenuhi', NOW()),
+  ((SELECT id FROM employees WHERE nip = 'EMP-005'), 2026, 1, 22, 0, 12, 0, 3, 0, 5, 'Terpenuhi', NOW()),
+  ((SELECT id FROM employees WHERE nip = 'EMP-006'), 2026, 1, 20, 1, 12, 0, 3, 0, 5, 'Terpenuhi', NOW()),
+  ((SELECT id FROM employees WHERE nip = 'EMP-007'), 2026, 1, 22, 0, 12, 0, 3, 0, 5, 'Terpenuhi', NOW()),
+  ((SELECT id FROM employees WHERE nip = 'EMP-008'), 2026, 1, 20, 1, 12, 0, 3, 0, 5, 'Terpenuhi', NOW()),
+  ((SELECT id FROM employees WHERE nip = 'EMP-009'), 2026, 1, 21, 1, 12, 0, 3, 0, 5, 'Terpenuhi', NOW()),
+  ((SELECT id FROM employees WHERE nip = 'EMP-010'), 2026, 1, 19, 1, 12, 0, 3, 0, 5, 'Terpenuhi', NOW()),
+  ((SELECT id FROM employees WHERE nip = 'EMP-011'), 2026, 1, 21, 1, 12, 0, 3, 0, 5, 'Terpenuhi', NOW()),
+  ((SELECT id FROM employees WHERE nip = 'EMP-012'), 2026, 1, 20, 1, 12, 0, 3, 0, 5, 'Terpenuhi', NOW()),
+  ((SELECT id FROM employees WHERE nip = 'EMP-013'), 2026, 1, 21, 1, 12, 0, 3, 0, 5, 'Terpenuhi', NOW()),
+  ((SELECT id FROM employees WHERE nip = 'EMP-014'), 2026, 1, 20, 1, 12, 0, 3, 0, 5, 'Terpenuhi', NOW()),
+  ((SELECT id FROM employees WHERE nip = 'EMP-015'), 2026, 1, 22, 0, 12, 0, 3, 0, 5, 'Terpenuhi', NOW()),
+  ((SELECT id FROM employees WHERE nip = 'EMP-016'), 2026, 1, 16, 1, 12, 2, 3, 0, 5, 'Tidak terpenuhi', NOW()),
+  ((SELECT id FROM employees WHERE nip = 'EMP-017'), 2026, 1, 21, 1, 12, 0, 3, 0, 5, 'Terpenuhi', NOW()),
+  ((SELECT id FROM employees WHERE nip = 'EMP-018'), 2026, 1, 20, 1, 12, 0, 3, 0, 5, 'Terpenuhi', NOW()),
+  ((SELECT id FROM employees WHERE nip = 'EMP-019'), 2026, 1, 22, 0, 12, 0, 3, 0, 5, 'Terpenuhi', NOW()),
+  ((SELECT id FROM employees WHERE nip = 'EMP-020'), 2026, 1, 20, 1, 12, 0, 3, 0, 5, 'Terpenuhi', NOW()),
+  ((SELECT id FROM employees WHERE nip = 'EMP-021'), 2026, 1, 20, 1, 12, 0, 3, 0, 5, 'Terpenuhi', NOW()),
+  ((SELECT id FROM employees WHERE nip = 'EMP-022'), 2026, 1, 21, 1, 12, 0, 3, 0, 5, 'Terpenuhi', NOW()),
+  ((SELECT id FROM employees WHERE nip = 'EMP-023'), 2026, 1, 21, 1, 12, 0, 3, 0, 5, 'Terpenuhi', NOW()),
+  ((SELECT id FROM employees WHERE nip = 'EMP-024'), 2026, 1, 20, 1, 12, 0, 3, 0, 5, 'Terpenuhi', NOW()),
+  ((SELECT id FROM employees WHERE nip = 'EMP-001'), 2026, 2, 20, 1, 12, 0, 3, 0, 5, 'Terpenuhi', NOW()),
+  ((SELECT id FROM employees WHERE nip = 'EMP-002'), 2026, 2, 20, 1, 12, 0, 3, 0, 5, 'Terpenuhi', NOW()),
+  ((SELECT id FROM employees WHERE nip = 'EMP-003'), 2026, 2, 18, 1, 12, 0, 3, 0, 5, 'Tidak terpenuhi', NOW()),
+  ((SELECT id FROM employees WHERE nip = 'EMP-004'), 2026, 2, 19, 1, 12, 0, 3, 0, 5, 'Terpenuhi', NOW()),
+  ((SELECT id FROM employees WHERE nip = 'EMP-005'), 2026, 2, 22, 0, 12, 0, 3, 0, 5, 'Terpenuhi', NOW()),
+  ((SELECT id FROM employees WHERE nip = 'EMP-006'), 2026, 2, 20, 1, 12, 0, 3, 0, 5, 'Terpenuhi', NOW()),
+  ((SELECT id FROM employees WHERE nip = 'EMP-007'), 2026, 2, 20, 1, 12, 0, 3, 0, 5, 'Terpenuhi', NOW()),
+  ((SELECT id FROM employees WHERE nip = 'EMP-008'), 2026, 2, 19, 1, 12, 0, 3, 0, 5, 'Terpenuhi', NOW()),
+  ((SELECT id FROM employees WHERE nip = 'EMP-009'), 2026, 2, 21, 1, 12, 0, 3, 0, 5, 'Terpenuhi', NOW()),
+  ((SELECT id FROM employees WHERE nip = 'EMP-010'), 2026, 2, 19, 1, 12, 0, 3, 0, 5, 'Terpenuhi', NOW()),
+  ((SELECT id FROM employees WHERE nip = 'EMP-011'), 2026, 2, 21, 1, 12, 0, 3, 0, 5, 'Terpenuhi', NOW()),
+  ((SELECT id FROM employees WHERE nip = 'EMP-012'), 2026, 2, 20, 1, 12, 0, 3, 0, 5, 'Terpenuhi', NOW()),
+  ((SELECT id FROM employees WHERE nip = 'EMP-013'), 2026, 2, 19, 1, 12, 0, 3, 0, 5, 'Terpenuhi', NOW()),
+  ((SELECT id FROM employees WHERE nip = 'EMP-014'), 2026, 2, 19, 1, 12, 0, 3, 0, 5, 'Terpenuhi', NOW()),
+  ((SELECT id FROM employees WHERE nip = 'EMP-015'), 2026, 2, 22, 0, 12, 0, 3, 0, 5, 'Terpenuhi', NOW()),
+  ((SELECT id FROM employees WHERE nip = 'EMP-016'), 2026, 2, 14, 1, 12, 2, 3, 1, 5, 'Tidak terpenuhi', NOW()),
+  ((SELECT id FROM employees WHERE nip = 'EMP-017'), 2026, 2, 21, 1, 12, 0, 3, 0, 5, 'Terpenuhi', NOW()),
+  ((SELECT id FROM employees WHERE nip = 'EMP-018'), 2026, 2, 20, 1, 12, 0, 3, 0, 5, 'Terpenuhi', NOW()),
+  ((SELECT id FROM employees WHERE nip = 'EMP-019'), 2026, 2, 20, 1, 12, 0, 3, 0, 5, 'Terpenuhi', NOW()),
+  ((SELECT id FROM employees WHERE nip = 'EMP-020'), 2026, 2, 19, 1, 12, 0, 3, 0, 5, 'Terpenuhi', NOW()),
+  ((SELECT id FROM employees WHERE nip = 'EMP-021'), 2026, 2, 20, 1, 12, 0, 3, 0, 5, 'Terpenuhi', NOW()),
+  ((SELECT id FROM employees WHERE nip = 'EMP-022'), 2026, 2, 19, 1, 12, 0, 3, 0, 5, 'Terpenuhi', NOW()),
+  ((SELECT id FROM employees WHERE nip = 'EMP-023'), 2026, 2, 21, 1, 12, 0, 3, 0, 5, 'Terpenuhi', NOW()),
+  ((SELECT id FROM employees WHERE nip = 'EMP-024'), 2026, 2, 20, 1, 12, 0, 3, 0, 5, 'Terpenuhi', NOW()),
+  ((SELECT id FROM employees WHERE nip = 'EMP-001'), 2026, 3, 22, 0, 12, 0, 3, 0, 5, 'Terpenuhi', NOW()),
+  ((SELECT id FROM employees WHERE nip = 'EMP-002'), 2026, 3, 20, 1, 12, 0, 3, 0, 5, 'Terpenuhi', NOW()),
+  ((SELECT id FROM employees WHERE nip = 'EMP-003'), 2026, 3, 18, 1, 12, 0, 3, 0, 5, 'Tidak terpenuhi', NOW()),
+  ((SELECT id FROM employees WHERE nip = 'EMP-004'), 2026, 3, 22, 0, 12, 0, 3, 0, 5, 'Terpenuhi', NOW()),
+  ((SELECT id FROM employees WHERE nip = 'EMP-005'), 2026, 3, 22, 0, 12, 0, 3, 0, 5, 'Terpenuhi', NOW()),
+  ((SELECT id FROM employees WHERE nip = 'EMP-006'), 2026, 3, 20, 1, 12, 0, 3, 0, 5, 'Terpenuhi', NOW()),
+  ((SELECT id FROM employees WHERE nip = 'EMP-007'), 2026, 3, 22, 0, 12, 0, 3, 0, 5, 'Terpenuhi', NOW()),
+  ((SELECT id FROM employees WHERE nip = 'EMP-008'), 2026, 3, 21, 1, 12, 0, 3, 0, 5, 'Terpenuhi', NOW()),
+  ((SELECT id FROM employees WHERE nip = 'EMP-009'), 2026, 3, 21, 1, 12, 0, 3, 0, 5, 'Terpenuhi', NOW()),
+  ((SELECT id FROM employees WHERE nip = 'EMP-010'), 2026, 3, 19, 1, 12, 0, 3, 0, 5, 'Terpenuhi', NOW()),
+  ((SELECT id FROM employees WHERE nip = 'EMP-011'), 2026, 3, 21, 1, 12, 0, 3, 0, 5, 'Terpenuhi', NOW()),
+  ((SELECT id FROM employees WHERE nip = 'EMP-012'), 2026, 3, 20, 1, 12, 0, 3, 0, 5, 'Terpenuhi', NOW()),
+  ((SELECT id FROM employees WHERE nip = 'EMP-013'), 2026, 3, 21, 1, 12, 0, 3, 0, 5, 'Terpenuhi', NOW()),
+  ((SELECT id FROM employees WHERE nip = 'EMP-014'), 2026, 3, 21, 1, 12, 0, 3, 0, 5, 'Terpenuhi', NOW()),
+  ((SELECT id FROM employees WHERE nip = 'EMP-015'), 2026, 3, 22, 0, 12, 0, 3, 0, 5, 'Terpenuhi', NOW()),
+  ((SELECT id FROM employees WHERE nip = 'EMP-016'), 2026, 3, 16, 1, 12, 2, 3, 0, 5, 'Tidak terpenuhi', NOW()),
+  ((SELECT id FROM employees WHERE nip = 'EMP-017'), 2026, 3, 21, 1, 12, 0, 3, 0, 5, 'Terpenuhi', NOW()),
+  ((SELECT id FROM employees WHERE nip = 'EMP-018'), 2026, 3, 20, 1, 12, 0, 3, 0, 5, 'Terpenuhi', NOW()),
+  ((SELECT id FROM employees WHERE nip = 'EMP-019'), 2026, 3, 22, 0, 12, 0, 3, 0, 5, 'Terpenuhi', NOW()),
+  ((SELECT id FROM employees WHERE nip = 'EMP-020'), 2026, 3, 21, 1, 12, 0, 3, 0, 5, 'Terpenuhi', NOW()),
+  ((SELECT id FROM employees WHERE nip = 'EMP-021'), 2026, 3, 20, 1, 12, 0, 3, 0, 5, 'Terpenuhi', NOW()),
+  ((SELECT id FROM employees WHERE nip = 'EMP-022'), 2026, 3, 21, 1, 12, 0, 3, 0, 5, 'Terpenuhi', NOW()),
+  ((SELECT id FROM employees WHERE nip = 'EMP-023'), 2026, 3, 21, 1, 12, 0, 3, 0, 5, 'Terpenuhi', NOW()),
+  ((SELECT id FROM employees WHERE nip = 'EMP-024'), 2026, 3, 20, 1, 12, 0, 3, 0, 5, 'Terpenuhi', NOW()),
+  ((SELECT id FROM employees WHERE nip = 'EMP-001'), 2026, 4, 20, 1, 12, 0, 3, 0, 5, 'Terpenuhi', NOW()),
+  ((SELECT id FROM employees WHERE nip = 'EMP-002'), 2026, 4, 20, 1, 12, 0, 3, 0, 5, 'Terpenuhi', NOW()),
+  ((SELECT id FROM employees WHERE nip = 'EMP-003'), 2026, 4, 18, 1, 12, 0, 3, 0, 5, 'Tidak terpenuhi', NOW()),
+  ((SELECT id FROM employees WHERE nip = 'EMP-004'), 2026, 4, 20, 1, 12, 0, 3, 0, 5, 'Terpenuhi', NOW()),
+  ((SELECT id FROM employees WHERE nip = 'EMP-005'), 2026, 4, 22, 0, 12, 0, 3, 0, 5, 'Terpenuhi', NOW()),
+  ((SELECT id FROM employees WHERE nip = 'EMP-006'), 2026, 4, 20, 1, 12, 0, 3, 0, 5, 'Terpenuhi', NOW()),
+  ((SELECT id FROM employees WHERE nip = 'EMP-007'), 2026, 4, 21, 1, 12, 0, 3, 0, 5, 'Terpenuhi', NOW()),
+  ((SELECT id FROM employees WHERE nip = 'EMP-008'), 2026, 4, 20, 1, 12, 0, 3, 0, 5, 'Terpenuhi', NOW()),
+  ((SELECT id FROM employees WHERE nip = 'EMP-009'), 2026, 4, 21, 1, 12, 0, 3, 0, 5, 'Terpenuhi', NOW()),
+  ((SELECT id FROM employees WHERE nip = 'EMP-010'), 2026, 4, 19, 1, 12, 0, 3, 0, 5, 'Terpenuhi', NOW()),
+  ((SELECT id FROM employees WHERE nip = 'EMP-011'), 2026, 4, 21, 1, 12, 0, 3, 0, 5, 'Terpenuhi', NOW()),
+  ((SELECT id FROM employees WHERE nip = 'EMP-012'), 2026, 4, 20, 1, 12, 0, 3, 0, 5, 'Terpenuhi', NOW()),
+  ((SELECT id FROM employees WHERE nip = 'EMP-013'), 2026, 4, 20, 1, 12, 0, 3, 0, 5, 'Terpenuhi', NOW()),
+  ((SELECT id FROM employees WHERE nip = 'EMP-014'), 2026, 4, 19, 1, 12, 0, 3, 0, 5, 'Terpenuhi', NOW()),
+  ((SELECT id FROM employees WHERE nip = 'EMP-015'), 2026, 4, 22, 0, 12, 0, 3, 0, 5, 'Terpenuhi', NOW()),
+  ((SELECT id FROM employees WHERE nip = 'EMP-016'), 2026, 4, 15, 1, 12, 2, 3, 0, 5, 'Tidak terpenuhi', NOW()),
+  ((SELECT id FROM employees WHERE nip = 'EMP-017'), 2026, 4, 21, 1, 12, 0, 3, 0, 5, 'Terpenuhi', NOW()),
+  ((SELECT id FROM employees WHERE nip = 'EMP-018'), 2026, 4, 20, 1, 12, 0, 3, 0, 5, 'Terpenuhi', NOW()),
+  ((SELECT id FROM employees WHERE nip = 'EMP-019'), 2026, 4, 21, 1, 12, 0, 3, 0, 5, 'Terpenuhi', NOW()),
+  ((SELECT id FROM employees WHERE nip = 'EMP-020'), 2026, 4, 20, 1, 12, 0, 3, 0, 5, 'Terpenuhi', NOW()),
+  ((SELECT id FROM employees WHERE nip = 'EMP-021'), 2026, 4, 20, 1, 12, 0, 3, 0, 5, 'Terpenuhi', NOW()),
+  ((SELECT id FROM employees WHERE nip = 'EMP-022'), 2026, 4, 20, 1, 12, 0, 3, 0, 5, 'Terpenuhi', NOW()),
+  ((SELECT id FROM employees WHERE nip = 'EMP-023'), 2026, 4, 21, 1, 12, 0, 3, 0, 5, 'Terpenuhi', NOW()),
+  ((SELECT id FROM employees WHERE nip = 'EMP-024'), 2026, 4, 20, 1, 12, 0, 3, 0, 5, 'Terpenuhi', NOW()),
+  ((SELECT id FROM employees WHERE nip = 'EMP-001'), 2026, 5, 21, 1, 12, 0, 3, 0, 5, 'Terpenuhi', NOW()),
+  ((SELECT id FROM employees WHERE nip = 'EMP-002'), 2026, 5, 20, 1, 12, 0, 3, 0, 5, 'Terpenuhi', NOW()),
+  ((SELECT id FROM employees WHERE nip = 'EMP-003'), 2026, 5, 18, 1, 12, 0, 3, 0, 5, 'Tidak terpenuhi', NOW()),
+  ((SELECT id FROM employees WHERE nip = 'EMP-004'), 2026, 5, 21, 1, 12, 0, 3, 0, 5, 'Terpenuhi', NOW()),
+  ((SELECT id FROM employees WHERE nip = 'EMP-005'), 2026, 5, 22, 0, 12, 0, 3, 0, 5, 'Terpenuhi', NOW()),
+  ((SELECT id FROM employees WHERE nip = 'EMP-006'), 2026, 5, 20, 1, 12, 0, 3, 0, 5, 'Terpenuhi', NOW()),
+  ((SELECT id FROM employees WHERE nip = 'EMP-007'), 2026, 5, 22, 0, 12, 0, 3, 0, 5, 'Terpenuhi', NOW()),
+  ((SELECT id FROM employees WHERE nip = 'EMP-008'), 2026, 5, 20, 1, 12, 0, 3, 0, 5, 'Terpenuhi', NOW()),
+  ((SELECT id FROM employees WHERE nip = 'EMP-009'), 2026, 5, 21, 1, 12, 0, 3, 0, 5, 'Terpenuhi', NOW()),
+  ((SELECT id FROM employees WHERE nip = 'EMP-010'), 2026, 5, 19, 1, 12, 0, 3, 0, 5, 'Terpenuhi', NOW()),
+  ((SELECT id FROM employees WHERE nip = 'EMP-011'), 2026, 5, 21, 1, 12, 0, 3, 0, 5, 'Terpenuhi', NOW()),
+  ((SELECT id FROM employees WHERE nip = 'EMP-012'), 2026, 5, 20, 1, 12, 0, 3, 0, 5, 'Terpenuhi', NOW()),
+  ((SELECT id FROM employees WHERE nip = 'EMP-013'), 2026, 5, 21, 1, 12, 0, 3, 0, 5, 'Terpenuhi', NOW()),
+  ((SELECT id FROM employees WHERE nip = 'EMP-014'), 2026, 5, 21, 1, 12, 0, 3, 0, 5, 'Terpenuhi', NOW()),
+  ((SELECT id FROM employees WHERE nip = 'EMP-015'), 2026, 5, 22, 0, 12, 0, 3, 0, 5, 'Terpenuhi', NOW()),
+  ((SELECT id FROM employees WHERE nip = 'EMP-016'), 2026, 5, 16, 1, 12, 2, 3, 0, 5, 'Tidak terpenuhi', NOW()),
+  ((SELECT id FROM employees WHERE nip = 'EMP-017'), 2026, 5, 21, 1, 12, 0, 3, 0, 5, 'Terpenuhi', NOW()),
+  ((SELECT id FROM employees WHERE nip = 'EMP-018'), 2026, 5, 20, 1, 12, 0, 3, 0, 5, 'Terpenuhi', NOW()),
+  ((SELECT id FROM employees WHERE nip = 'EMP-019'), 2026, 5, 22, 0, 12, 0, 3, 0, 5, 'Terpenuhi', NOW()),
+  ((SELECT id FROM employees WHERE nip = 'EMP-020'), 2026, 5, 21, 1, 12, 0, 3, 0, 5, 'Terpenuhi', NOW()),
+  ((SELECT id FROM employees WHERE nip = 'EMP-021'), 2026, 5, 20, 1, 12, 0, 3, 0, 5, 'Terpenuhi', NOW()),
+  ((SELECT id FROM employees WHERE nip = 'EMP-022'), 2026, 5, 21, 1, 12, 0, 3, 0, 5, 'Terpenuhi', NOW()),
+  ((SELECT id FROM employees WHERE nip = 'EMP-023'), 2026, 5, 21, 1, 12, 0, 3, 0, 5, 'Terpenuhi', NOW()),
+  ((SELECT id FROM employees WHERE nip = 'EMP-024'), 2026, 5, 20, 1, 12, 0, 3, 0, 5, 'Terpenuhi', NOW()),
+  ((SELECT id FROM employees WHERE nip = 'EMP-001'), 2026, 6, 21, 1, 12, 0, 3, 0, 5, 'Terpenuhi', NOW()),
+  ((SELECT id FROM employees WHERE nip = 'EMP-002'), 2026, 6, 20, 1, 12, 0, 3, 0, 5, 'Terpenuhi', NOW()),
+  ((SELECT id FROM employees WHERE nip = 'EMP-003'), 2026, 6, 18, 1, 12, 0, 3, 0, 5, 'Tidak terpenuhi', NOW()),
+  ((SELECT id FROM employees WHERE nip = 'EMP-004'), 2026, 6, 20, 1, 12, 0, 3, 0, 5, 'Terpenuhi', NOW()),
+  ((SELECT id FROM employees WHERE nip = 'EMP-005'), 2026, 6, 22, 0, 12, 0, 3, 0, 5, 'Terpenuhi', NOW()),
+  ((SELECT id FROM employees WHERE nip = 'EMP-006'), 2026, 6, 20, 1, 12, 0, 3, 0, 5, 'Terpenuhi', NOW()),
+  ((SELECT id FROM employees WHERE nip = 'EMP-007'), 2026, 6, 21, 1, 12, 0, 3, 0, 5, 'Terpenuhi', NOW()),
+  ((SELECT id FROM employees WHERE nip = 'EMP-008'), 2026, 6, 20, 1, 12, 0, 3, 0, 5, 'Terpenuhi', NOW()),
+  ((SELECT id FROM employees WHERE nip = 'EMP-009'), 2026, 6, 21, 1, 12, 0, 3, 0, 5, 'Terpenuhi', NOW()),
+  ((SELECT id FROM employees WHERE nip = 'EMP-010'), 2026, 6, 19, 1, 12, 0, 3, 0, 5, 'Terpenuhi', NOW()),
+  ((SELECT id FROM employees WHERE nip = 'EMP-011'), 2026, 6, 21, 1, 12, 0, 3, 0, 5, 'Terpenuhi', NOW()),
+  ((SELECT id FROM employees WHERE nip = 'EMP-012'), 2026, 6, 20, 1, 12, 0, 3, 0, 5, 'Terpenuhi', NOW()),
+  ((SELECT id FROM employees WHERE nip = 'EMP-013'), 2026, 6, 20, 1, 12, 0, 3, 0, 5, 'Terpenuhi', NOW()),
+  ((SELECT id FROM employees WHERE nip = 'EMP-014'), 2026, 6, 20, 1, 12, 0, 3, 0, 5, 'Terpenuhi', NOW()),
+  ((SELECT id FROM employees WHERE nip = 'EMP-015'), 2026, 6, 22, 0, 12, 0, 3, 0, 5, 'Terpenuhi', NOW()),
+  ((SELECT id FROM employees WHERE nip = 'EMP-016'), 2026, 6, 16, 1, 12, 2, 3, 0, 5, 'Tidak terpenuhi', NOW()),
+  ((SELECT id FROM employees WHERE nip = 'EMP-017'), 2026, 6, 21, 1, 12, 0, 3, 0, 5, 'Terpenuhi', NOW()),
+  ((SELECT id FROM employees WHERE nip = 'EMP-018'), 2026, 6, 20, 1, 12, 0, 3, 0, 5, 'Terpenuhi', NOW()),
+  ((SELECT id FROM employees WHERE nip = 'EMP-019'), 2026, 6, 21, 1, 12, 0, 3, 0, 5, 'Terpenuhi', NOW()),
+  ((SELECT id FROM employees WHERE nip = 'EMP-020'), 2026, 6, 20, 1, 12, 0, 3, 0, 5, 'Terpenuhi', NOW()),
+  ((SELECT id FROM employees WHERE nip = 'EMP-021'), 2026, 6, 20, 1, 12, 0, 3, 0, 5, 'Terpenuhi', NOW()),
+  ((SELECT id FROM employees WHERE nip = 'EMP-022'), 2026, 6, 21, 1, 12, 0, 3, 0, 5, 'Terpenuhi', NOW()),
+  ((SELECT id FROM employees WHERE nip = 'EMP-023'), 2026, 6, 21, 1, 12, 0, 3, 0, 5, 'Terpenuhi', NOW()),
+  ((SELECT id FROM employees WHERE nip = 'EMP-024'), 2026, 6, 20, 1, 12, 0, 3, 0, 5, 'Terpenuhi', NOW()),
+  ((SELECT id FROM employees WHERE nip = 'EMP-001'), 2026, 7, 22, 0, 12, 0, 3, 0, 5, 'Terpenuhi', NOW()),
+  ((SELECT id FROM employees WHERE nip = 'EMP-002'), 2026, 7, 20, 1, 12, 0, 3, 0, 5, 'Terpenuhi', NOW()),
+  ((SELECT id FROM employees WHERE nip = 'EMP-003'), 2026, 7, 18, 1, 12, 0, 3, 0, 5, 'Tidak terpenuhi', NOW()),
+  ((SELECT id FROM employees WHERE nip = 'EMP-004'), 2026, 7, 21, 1, 12, 0, 3, 0, 5, 'Terpenuhi', NOW()),
+  ((SELECT id FROM employees WHERE nip = 'EMP-005'), 2026, 7, 22, 0, 12, 0, 3, 0, 5, 'Terpenuhi', NOW()),
+  ((SELECT id FROM employees WHERE nip = 'EMP-006'), 2026, 7, 20, 1, 12, 0, 3, 0, 5, 'Terpenuhi', NOW()),
+  ((SELECT id FROM employees WHERE nip = 'EMP-007'), 2026, 7, 21, 1, 12, 0, 3, 0, 5, 'Terpenuhi', NOW()),
+  ((SELECT id FROM employees WHERE nip = 'EMP-008'), 2026, 7, 21, 1, 12, 0, 3, 0, 5, 'Terpenuhi', NOW()),
+  ((SELECT id FROM employees WHERE nip = 'EMP-009'), 2026, 7, 21, 1, 12, 0, 3, 0, 5, 'Terpenuhi', NOW()),
+  ((SELECT id FROM employees WHERE nip = 'EMP-010'), 2026, 7, 19, 1, 12, 0, 3, 0, 5, 'Terpenuhi', NOW()),
+  ((SELECT id FROM employees WHERE nip = 'EMP-011'), 2026, 7, 21, 1, 12, 0, 3, 0, 5, 'Terpenuhi', NOW()),
+  ((SELECT id FROM employees WHERE nip = 'EMP-012'), 2026, 7, 20, 1, 12, 0, 3, 0, 5, 'Terpenuhi', NOW()),
+  ((SELECT id FROM employees WHERE nip = 'EMP-013'), 2026, 7, 22, 0, 12, 0, 3, 0, 5, 'Terpenuhi', NOW()),
+  ((SELECT id FROM employees WHERE nip = 'EMP-014'), 2026, 7, 20, 1, 12, 0, 3, 0, 5, 'Terpenuhi', NOW()),
+  ((SELECT id FROM employees WHERE nip = 'EMP-015'), 2026, 7, 22, 0, 12, 0, 3, 0, 5, 'Terpenuhi', NOW()),
+  ((SELECT id FROM employees WHERE nip = 'EMP-016'), 2026, 7, 16, 1, 12, 2, 3, 0, 5, 'Tidak terpenuhi', NOW()),
+  ((SELECT id FROM employees WHERE nip = 'EMP-017'), 2026, 7, 21, 1, 12, 0, 3, 0, 5, 'Terpenuhi', NOW()),
+  ((SELECT id FROM employees WHERE nip = 'EMP-018'), 2026, 7, 20, 1, 12, 0, 3, 0, 5, 'Terpenuhi', NOW()),
+  ((SELECT id FROM employees WHERE nip = 'EMP-019'), 2026, 7, 21, 1, 12, 0, 3, 0, 5, 'Terpenuhi', NOW()),
+  ((SELECT id FROM employees WHERE nip = 'EMP-020'), 2026, 7, 22, 0, 12, 0, 3, 0, 5, 'Terpenuhi', NOW()),
+  ((SELECT id FROM employees WHERE nip = 'EMP-021'), 2026, 7, 20, 1, 12, 0, 3, 0, 5, 'Terpenuhi', NOW()),
+  ((SELECT id FROM employees WHERE nip = 'EMP-022'), 2026, 7, 20, 1, 12, 0, 3, 0, 5, 'Terpenuhi', NOW()),
+  ((SELECT id FROM employees WHERE nip = 'EMP-023'), 2026, 7, 21, 1, 12, 0, 3, 0, 5, 'Terpenuhi', NOW()),
+  ((SELECT id FROM employees WHERE nip = 'EMP-024'), 2026, 7, 20, 1, 12, 0, 3, 0, 5, 'Terpenuhi', NOW()),
+  ((SELECT id FROM employees WHERE nip = 'EMP-001'), 2026, 8, 21, 1, 12, 0, 3, 0, 5, 'Terpenuhi', NOW()),
   ((SELECT id FROM employees WHERE nip = 'EMP-002'), 2026, 8, 20, 1, 12, 0, 3, 0, 5, 'Terpenuhi', NOW()),
-  ((SELECT id FROM employees WHERE nip = 'EMP-003'), 2026, 8, 16, 2, 12, 2, 3, 1, 5, 'Tidak terpenuhi', NOW()),
-  ((SELECT id FROM employees WHERE nip = 'EMP-016'), 2026, 8, 12, 0, 12, 3, 3, 0, 5, 'Tidak terpenuhi', NOW())
+  ((SELECT id FROM employees WHERE nip = 'EMP-003'), 2026, 8, 18, 1, 12, 0, 3, 0, 5, 'Tidak terpenuhi', NOW()),
+  ((SELECT id FROM employees WHERE nip = 'EMP-004'), 2026, 8, 21, 1, 12, 0, 3, 0, 5, 'Terpenuhi', NOW()),
+  ((SELECT id FROM employees WHERE nip = 'EMP-005'), 2026, 8, 22, 0, 12, 0, 3, 0, 5, 'Terpenuhi', NOW()),
+  ((SELECT id FROM employees WHERE nip = 'EMP-006'), 2026, 8, 20, 1, 12, 0, 3, 0, 5, 'Terpenuhi', NOW()),
+  ((SELECT id FROM employees WHERE nip = 'EMP-007'), 2026, 8, 22, 0, 12, 0, 3, 0, 5, 'Terpenuhi', NOW()),
+  ((SELECT id FROM employees WHERE nip = 'EMP-008'), 2026, 8, 20, 1, 12, 0, 3, 0, 5, 'Terpenuhi', NOW()),
+  ((SELECT id FROM employees WHERE nip = 'EMP-009'), 2026, 8, 21, 1, 12, 0, 3, 0, 5, 'Terpenuhi', NOW()),
+  ((SELECT id FROM employees WHERE nip = 'EMP-010'), 2026, 8, 19, 1, 12, 0, 3, 0, 5, 'Terpenuhi', NOW()),
+  ((SELECT id FROM employees WHERE nip = 'EMP-011'), 2026, 8, 21, 1, 12, 0, 3, 0, 5, 'Terpenuhi', NOW()),
+  ((SELECT id FROM employees WHERE nip = 'EMP-012'), 2026, 8, 20, 1, 12, 0, 3, 0, 5, 'Terpenuhi', NOW()),
+  ((SELECT id FROM employees WHERE nip = 'EMP-013'), 2026, 8, 21, 1, 12, 0, 3, 0, 5, 'Terpenuhi', NOW()),
+  ((SELECT id FROM employees WHERE nip = 'EMP-014'), 2026, 8, 19, 1, 12, 0, 3, 0, 5, 'Terpenuhi', NOW()),
+  ((SELECT id FROM employees WHERE nip = 'EMP-015'), 2026, 8, 22, 0, 12, 0, 3, 0, 5, 'Terpenuhi', NOW()),
+  ((SELECT id FROM employees WHERE nip = 'EMP-016'), 2026, 8, 12, 1, 12, 2, 3, 1, 5, 'Tidak terpenuhi', NOW()),
+  ((SELECT id FROM employees WHERE nip = 'EMP-017'), 2026, 8, 21, 1, 12, 0, 3, 0, 5, 'Terpenuhi', NOW()),
+  ((SELECT id FROM employees WHERE nip = 'EMP-018'), 2026, 8, 20, 1, 12, 0, 3, 0, 5, 'Terpenuhi', NOW()),
+  ((SELECT id FROM employees WHERE nip = 'EMP-019'), 2026, 8, 22, 0, 12, 0, 3, 0, 5, 'Terpenuhi', NOW()),
+  ((SELECT id FROM employees WHERE nip = 'EMP-020'), 2026, 8, 20, 1, 12, 0, 3, 0, 5, 'Terpenuhi', NOW()),
+  ((SELECT id FROM employees WHERE nip = 'EMP-021'), 2026, 8, 20, 1, 12, 0, 3, 0, 5, 'Terpenuhi', NOW()),
+  ((SELECT id FROM employees WHERE nip = 'EMP-022'), 2026, 8, 21, 1, 12, 0, 3, 0, 5, 'Terpenuhi', NOW()),
+  ((SELECT id FROM employees WHERE nip = 'EMP-023'), 2026, 8, 21, 1, 12, 0, 3, 0, 5, 'Terpenuhi', NOW()),
+  ((SELECT id FROM employees WHERE nip = 'EMP-024'), 2026, 8, 20, 1, 12, 0, 3, 0, 5, 'Terpenuhi', NOW())
 ON DUPLICATE KEY UPDATE
   hadir = VALUES(hadir),
   cuti = VALUES(cuti),
@@ -585,5 +835,588 @@ ON DUPLICATE KEY UPDATE
   kuota_unpaid_leave = VALUES(kuota_unpaid_leave),
   status_hadir = VALUES(status_hadir),
   calculated_at = NOW();
+
+-- Setting Tunjangan Transport (transport_allowance_settings)
+INSERT INTO transport_allowance_settings (
+  base_fare, effective_start, min_km, max_km, min_work_days, is_active, created_by
+) VALUES (
+  5000.00, '2026-01-01', 5.00, 25.00, 19, 1, (SELECT id FROM users WHERE username = 'admin_hrd' LIMIT 1)
+);
+
+-- Periode Tunjangan Transport (transport_allowance_periods)
+INSERT INTO transport_allowance_periods (
+  period_year, period_month, total_recipients, total_amount, status, calculated_by, calculated_at
+) VALUES
+  (2025, 11, 9, 9540000.00, 'calculated', (SELECT id FROM users WHERE username = 'admin_hrd' LIMIT 1), '2025-12-01 08:30:00'),
+  (2025, 12, 9, 9895000.00, 'calculated', (SELECT id FROM users WHERE username = 'admin_hrd' LIMIT 1), '2026-01-02 08:30:00'),
+  (2026, 1, 9, 9885000.00, 'calculated', (SELECT id FROM users WHERE username = 'admin_hrd' LIMIT 1), '2026-02-01 08:30:00'),
+  (2026, 2, 9, 9135000.00, 'calculated', (SELECT id FROM users WHERE username = 'admin_hrd' LIMIT 1), '2026-03-01 08:30:00'),
+  (2026, 3, 9, 10105000.00, 'calculated', (SELECT id FROM users WHERE username = 'admin_hrd' LIMIT 1), '2026-04-01 08:30:00'),
+  (2026, 4, 9, 9505000.00, 'calculated', (SELECT id FROM users WHERE username = 'admin_hrd' LIMIT 1), '2026-05-01 08:30:00'),
+  (2026, 5, 9, 9985000.00, 'calculated', (SELECT id FROM users WHERE username = 'admin_hrd' LIMIT 1), '2026-06-01 08:30:00'),
+  (2026, 6, 9, 9660000.00, 'calculated', (SELECT id FROM users WHERE username = 'admin_hrd' LIMIT 1), '2026-07-01 08:30:00'),
+  (2026, 7, 9, 9885000.00, 'calculated', (SELECT id FROM users WHERE username = 'admin_hrd' LIMIT 1), '2026-08-01 08:30:00'),
+  (2026, 8, 9, 9830000.00, 'calculated', (SELECT id FROM users WHERE username = 'admin_hrd' LIMIT 1), '2026-09-01 08:30:00'),
+  (2026, 9, 0, 0.00, 'draft', NULL, NULL)
+ON DUPLICATE KEY UPDATE
+  total_recipients = VALUES(total_recipients),
+  total_amount = VALUES(total_amount),
+  status = VALUES(status),
+  calculated_by = VALUES(calculated_by),
+  calculated_at = VALUES(calculated_at);
+
+-- Detail Tunjangan Transport (transport_allowance_details)
+INSERT INTO transport_allowance_details (
+  transport_allowance_period_id, employee_id, base_fare, original_km, rounded_km, effective_km, attendance_days, nominal, eligibility_status, calculation_note
+) VALUES
+  (
+    (SELECT id FROM transport_allowance_periods WHERE period_year = 2025 AND period_month = 11),
+    (SELECT id FROM employees WHERE nip = 'EMP-001'),
+    5000.00, 8.50, 9.00, 9.00, 20, 900000.00,
+    'eligible', 'Memenuhi syarat: Pegawai tetap (PKWTT), jarak 8.5km dibulatkan 9km, hadir 20 hari'
+  ),
+  (
+    (SELECT id FROM transport_allowance_periods WHERE period_year = 2025 AND period_month = 11),
+    (SELECT id FROM employees WHERE nip = 'EMP-004'),
+    5000.00, 6.00, 6.00, 6.00, 20, 600000.00,
+    'eligible', 'Memenuhi syarat: Pegawai tetap (PKWTT), jarak 6.0km dibulatkan 6km, hadir 20 hari'
+  ),
+  (
+    (SELECT id FROM transport_allowance_periods WHERE period_year = 2025 AND period_month = 11),
+    (SELECT id FROM employees WHERE nip = 'EMP-007'),
+    5000.00, 28.00, 28.00, 25.00, 21, 2625000.00,
+    'eligible', 'Memenuhi syarat: Pegawai tetap (PKWTT), jarak 28.0km dibulatkan 28km (jarak riil 28km dicap maksimal 25km), hadir 21 hari'
+  ),
+  (
+    (SELECT id FROM transport_allowance_periods WHERE period_year = 2025 AND period_month = 11),
+    (SELECT id FROM employees WHERE nip = 'EMP-008'),
+    5000.00, 9.20, 9.00, 9.00, 20, 900000.00,
+    'eligible', 'Memenuhi syarat: Pegawai tetap (PKWTT), jarak 9.2km dibulatkan 9km, hadir 20 hari'
+  ),
+  (
+    (SELECT id FROM transport_allowance_periods WHERE period_year = 2025 AND period_month = 11),
+    (SELECT id FROM employees WHERE nip = 'EMP-013'),
+    5000.00, 6.70, 7.00, 7.00, 21, 735000.00,
+    'eligible', 'Memenuhi syarat: Pegawai tetap (PKWTT), jarak 6.7km dibulatkan 7km, hadir 21 hari'
+  ),
+  (
+    (SELECT id FROM transport_allowance_periods WHERE period_year = 2025 AND period_month = 11),
+    (SELECT id FROM employees WHERE nip = 'EMP-014'),
+    5000.00, 10.50, 11.00, 11.00, 19, 1045000.00,
+    'eligible', 'Memenuhi syarat: Pegawai tetap (PKWTT), jarak 10.5km dibulatkan 11km, hadir 19 hari'
+  ),
+  (
+    (SELECT id FROM transport_allowance_periods WHERE period_year = 2025 AND period_month = 11),
+    (SELECT id FROM employees WHERE nip = 'EMP-019'),
+    5000.00, 7.00, 7.00, 7.00, 21, 735000.00,
+    'eligible', 'Memenuhi syarat: Pegawai tetap (PKWTT), jarak 7.0km dibulatkan 7km, hadir 21 hari'
+  ),
+  (
+    (SELECT id FROM transport_allowance_periods WHERE period_year = 2025 AND period_month = 11),
+    (SELECT id FROM employees WHERE nip = 'EMP-020'),
+    5000.00, 9.00, 9.00, 9.00, 20, 900000.00,
+    'eligible', 'Memenuhi syarat: Pegawai tetap (PKWTT), jarak 9.0km dibulatkan 9km, hadir 20 hari'
+  ),
+  (
+    (SELECT id FROM transport_allowance_periods WHERE period_year = 2025 AND period_month = 11),
+    (SELECT id FROM employees WHERE nip = 'EMP-022'),
+    5000.00, 11.20, 11.00, 11.00, 20, 1100000.00,
+    'eligible', 'Memenuhi syarat: Pegawai tetap (PKWTT), jarak 11.2km dibulatkan 11km, hadir 20 hari'
+  ),
+  (
+    (SELECT id FROM transport_allowance_periods WHERE period_year = 2025 AND period_month = 12),
+    (SELECT id FROM employees WHERE nip = 'EMP-001'),
+    5000.00, 8.50, 9.00, 9.00, 21, 945000.00,
+    'eligible', 'Memenuhi syarat: Pegawai tetap (PKWTT), jarak 8.5km dibulatkan 9km, hadir 21 hari'
+  ),
+  (
+    (SELECT id FROM transport_allowance_periods WHERE period_year = 2025 AND period_month = 12),
+    (SELECT id FROM employees WHERE nip = 'EMP-004'),
+    5000.00, 6.00, 6.00, 6.00, 21, 630000.00,
+    'eligible', 'Memenuhi syarat: Pegawai tetap (PKWTT), jarak 6.0km dibulatkan 6km, hadir 21 hari'
+  ),
+  (
+    (SELECT id FROM transport_allowance_periods WHERE period_year = 2025 AND period_month = 12),
+    (SELECT id FROM employees WHERE nip = 'EMP-007'),
+    5000.00, 28.00, 28.00, 25.00, 22, 2750000.00,
+    'eligible', 'Memenuhi syarat: Pegawai tetap (PKWTT), jarak 28.0km dibulatkan 28km (jarak riil 28km dicap maksimal 25km), hadir 22 hari'
+  ),
+  (
+    (SELECT id FROM transport_allowance_periods WHERE period_year = 2025 AND period_month = 12),
+    (SELECT id FROM employees WHERE nip = 'EMP-008'),
+    5000.00, 9.20, 9.00, 9.00, 20, 900000.00,
+    'eligible', 'Memenuhi syarat: Pegawai tetap (PKWTT), jarak 9.2km dibulatkan 9km, hadir 20 hari'
+  ),
+  (
+    (SELECT id FROM transport_allowance_periods WHERE period_year = 2025 AND period_month = 12),
+    (SELECT id FROM employees WHERE nip = 'EMP-013'),
+    5000.00, 6.70, 7.00, 7.00, 20, 700000.00,
+    'eligible', 'Memenuhi syarat: Pegawai tetap (PKWTT), jarak 6.7km dibulatkan 7km, hadir 20 hari'
+  ),
+  (
+    (SELECT id FROM transport_allowance_periods WHERE period_year = 2025 AND period_month = 12),
+    (SELECT id FROM employees WHERE nip = 'EMP-014'),
+    5000.00, 10.50, 11.00, 11.00, 20, 1100000.00,
+    'eligible', 'Memenuhi syarat: Pegawai tetap (PKWTT), jarak 10.5km dibulatkan 11km, hadir 20 hari'
+  ),
+  (
+    (SELECT id FROM transport_allowance_periods WHERE period_year = 2025 AND period_month = 12),
+    (SELECT id FROM employees WHERE nip = 'EMP-019'),
+    5000.00, 7.00, 7.00, 7.00, 22, 770000.00,
+    'eligible', 'Memenuhi syarat: Pegawai tetap (PKWTT), jarak 7.0km dibulatkan 7km, hadir 22 hari'
+  ),
+  (
+    (SELECT id FROM transport_allowance_periods WHERE period_year = 2025 AND period_month = 12),
+    (SELECT id FROM employees WHERE nip = 'EMP-020'),
+    5000.00, 9.00, 9.00, 9.00, 21, 945000.00,
+    'eligible', 'Memenuhi syarat: Pegawai tetap (PKWTT), jarak 9.0km dibulatkan 9km, hadir 21 hari'
+  ),
+  (
+    (SELECT id FROM transport_allowance_periods WHERE period_year = 2025 AND period_month = 12),
+    (SELECT id FROM employees WHERE nip = 'EMP-022'),
+    5000.00, 11.20, 11.00, 11.00, 21, 1155000.00,
+    'eligible', 'Memenuhi syarat: Pegawai tetap (PKWTT), jarak 11.2km dibulatkan 11km, hadir 21 hari'
+  ),
+  (
+    (SELECT id FROM transport_allowance_periods WHERE period_year = 2026 AND period_month = 1),
+    (SELECT id FROM employees WHERE nip = 'EMP-001'),
+    5000.00, 8.50, 9.00, 9.00, 21, 945000.00,
+    'eligible', 'Memenuhi syarat: Pegawai tetap (PKWTT), jarak 8.5km dibulatkan 9km, hadir 21 hari'
+  ),
+  (
+    (SELECT id FROM transport_allowance_periods WHERE period_year = 2026 AND period_month = 1),
+    (SELECT id FROM employees WHERE nip = 'EMP-004'),
+    5000.00, 6.00, 6.00, 6.00, 21, 630000.00,
+    'eligible', 'Memenuhi syarat: Pegawai tetap (PKWTT), jarak 6.0km dibulatkan 6km, hadir 21 hari'
+  ),
+  (
+    (SELECT id FROM transport_allowance_periods WHERE period_year = 2026 AND period_month = 1),
+    (SELECT id FROM employees WHERE nip = 'EMP-007'),
+    5000.00, 28.00, 28.00, 25.00, 22, 2750000.00,
+    'eligible', 'Memenuhi syarat: Pegawai tetap (PKWTT), jarak 28.0km dibulatkan 28km (jarak riil 28km dicap maksimal 25km), hadir 22 hari'
+  ),
+  (
+    (SELECT id FROM transport_allowance_periods WHERE period_year = 2026 AND period_month = 1),
+    (SELECT id FROM employees WHERE nip = 'EMP-008'),
+    5000.00, 9.20, 9.00, 9.00, 20, 900000.00,
+    'eligible', 'Memenuhi syarat: Pegawai tetap (PKWTT), jarak 9.2km dibulatkan 9km, hadir 20 hari'
+  ),
+  (
+    (SELECT id FROM transport_allowance_periods WHERE period_year = 2026 AND period_month = 1),
+    (SELECT id FROM employees WHERE nip = 'EMP-013'),
+    5000.00, 6.70, 7.00, 7.00, 21, 735000.00,
+    'eligible', 'Memenuhi syarat: Pegawai tetap (PKWTT), jarak 6.7km dibulatkan 7km, hadir 21 hari'
+  ),
+  (
+    (SELECT id FROM transport_allowance_periods WHERE period_year = 2026 AND period_month = 1),
+    (SELECT id FROM employees WHERE nip = 'EMP-014'),
+    5000.00, 10.50, 11.00, 11.00, 20, 1100000.00,
+    'eligible', 'Memenuhi syarat: Pegawai tetap (PKWTT), jarak 10.5km dibulatkan 11km, hadir 20 hari'
+  ),
+  (
+    (SELECT id FROM transport_allowance_periods WHERE period_year = 2026 AND period_month = 1),
+    (SELECT id FROM employees WHERE nip = 'EMP-019'),
+    5000.00, 7.00, 7.00, 7.00, 22, 770000.00,
+    'eligible', 'Memenuhi syarat: Pegawai tetap (PKWTT), jarak 7.0km dibulatkan 7km, hadir 22 hari'
+  ),
+  (
+    (SELECT id FROM transport_allowance_periods WHERE period_year = 2026 AND period_month = 1),
+    (SELECT id FROM employees WHERE nip = 'EMP-020'),
+    5000.00, 9.00, 9.00, 9.00, 20, 900000.00,
+    'eligible', 'Memenuhi syarat: Pegawai tetap (PKWTT), jarak 9.0km dibulatkan 9km, hadir 20 hari'
+  ),
+  (
+    (SELECT id FROM transport_allowance_periods WHERE period_year = 2026 AND period_month = 1),
+    (SELECT id FROM employees WHERE nip = 'EMP-022'),
+    5000.00, 11.20, 11.00, 11.00, 21, 1155000.00,
+    'eligible', 'Memenuhi syarat: Pegawai tetap (PKWTT), jarak 11.2km dibulatkan 11km, hadir 21 hari'
+  ),
+  (
+    (SELECT id FROM transport_allowance_periods WHERE period_year = 2026 AND period_month = 2),
+    (SELECT id FROM employees WHERE nip = 'EMP-001'),
+    5000.00, 8.50, 9.00, 9.00, 20, 900000.00,
+    'eligible', 'Memenuhi syarat: Pegawai tetap (PKWTT), jarak 8.5km dibulatkan 9km, hadir 20 hari'
+  ),
+  (
+    (SELECT id FROM transport_allowance_periods WHERE period_year = 2026 AND period_month = 2),
+    (SELECT id FROM employees WHERE nip = 'EMP-004'),
+    5000.00, 6.00, 6.00, 6.00, 19, 570000.00,
+    'eligible', 'Memenuhi syarat: Pegawai tetap (PKWTT), jarak 6.0km dibulatkan 6km, hadir 19 hari'
+  ),
+  (
+    (SELECT id FROM transport_allowance_periods WHERE period_year = 2026 AND period_month = 2),
+    (SELECT id FROM employees WHERE nip = 'EMP-007'),
+    5000.00, 28.00, 28.00, 25.00, 20, 2500000.00,
+    'eligible', 'Memenuhi syarat: Pegawai tetap (PKWTT), jarak 28.0km dibulatkan 28km (jarak riil 28km dicap maksimal 25km), hadir 20 hari'
+  ),
+  (
+    (SELECT id FROM transport_allowance_periods WHERE period_year = 2026 AND period_month = 2),
+    (SELECT id FROM employees WHERE nip = 'EMP-008'),
+    5000.00, 9.20, 9.00, 9.00, 19, 855000.00,
+    'eligible', 'Memenuhi syarat: Pegawai tetap (PKWTT), jarak 9.2km dibulatkan 9km, hadir 19 hari'
+  ),
+  (
+    (SELECT id FROM transport_allowance_periods WHERE period_year = 2026 AND period_month = 2),
+    (SELECT id FROM employees WHERE nip = 'EMP-013'),
+    5000.00, 6.70, 7.00, 7.00, 19, 665000.00,
+    'eligible', 'Memenuhi syarat: Pegawai tetap (PKWTT), jarak 6.7km dibulatkan 7km, hadir 19 hari'
+  ),
+  (
+    (SELECT id FROM transport_allowance_periods WHERE period_year = 2026 AND period_month = 2),
+    (SELECT id FROM employees WHERE nip = 'EMP-014'),
+    5000.00, 10.50, 11.00, 11.00, 19, 1045000.00,
+    'eligible', 'Memenuhi syarat: Pegawai tetap (PKWTT), jarak 10.5km dibulatkan 11km, hadir 19 hari'
+  ),
+  (
+    (SELECT id FROM transport_allowance_periods WHERE period_year = 2026 AND period_month = 2),
+    (SELECT id FROM employees WHERE nip = 'EMP-019'),
+    5000.00, 7.00, 7.00, 7.00, 20, 700000.00,
+    'eligible', 'Memenuhi syarat: Pegawai tetap (PKWTT), jarak 7.0km dibulatkan 7km, hadir 20 hari'
+  ),
+  (
+    (SELECT id FROM transport_allowance_periods WHERE period_year = 2026 AND period_month = 2),
+    (SELECT id FROM employees WHERE nip = 'EMP-020'),
+    5000.00, 9.00, 9.00, 9.00, 19, 855000.00,
+    'eligible', 'Memenuhi syarat: Pegawai tetap (PKWTT), jarak 9.0km dibulatkan 9km, hadir 19 hari'
+  ),
+  (
+    (SELECT id FROM transport_allowance_periods WHERE period_year = 2026 AND period_month = 2),
+    (SELECT id FROM employees WHERE nip = 'EMP-022'),
+    5000.00, 11.20, 11.00, 11.00, 19, 1045000.00,
+    'eligible', 'Memenuhi syarat: Pegawai tetap (PKWTT), jarak 11.2km dibulatkan 11km, hadir 19 hari'
+  ),
+  (
+    (SELECT id FROM transport_allowance_periods WHERE period_year = 2026 AND period_month = 3),
+    (SELECT id FROM employees WHERE nip = 'EMP-001'),
+    5000.00, 8.50, 9.00, 9.00, 22, 990000.00,
+    'eligible', 'Memenuhi syarat: Pegawai tetap (PKWTT), jarak 8.5km dibulatkan 9km, hadir 22 hari'
+  ),
+  (
+    (SELECT id FROM transport_allowance_periods WHERE period_year = 2026 AND period_month = 3),
+    (SELECT id FROM employees WHERE nip = 'EMP-004'),
+    5000.00, 6.00, 6.00, 6.00, 22, 660000.00,
+    'eligible', 'Memenuhi syarat: Pegawai tetap (PKWTT), jarak 6.0km dibulatkan 6km, hadir 22 hari'
+  ),
+  (
+    (SELECT id FROM transport_allowance_periods WHERE period_year = 2026 AND period_month = 3),
+    (SELECT id FROM employees WHERE nip = 'EMP-007'),
+    5000.00, 28.00, 28.00, 25.00, 22, 2750000.00,
+    'eligible', 'Memenuhi syarat: Pegawai tetap (PKWTT), jarak 28.0km dibulatkan 28km (jarak riil 28km dicap maksimal 25km), hadir 22 hari'
+  ),
+  (
+    (SELECT id FROM transport_allowance_periods WHERE period_year = 2026 AND period_month = 3),
+    (SELECT id FROM employees WHERE nip = 'EMP-008'),
+    5000.00, 9.20, 9.00, 9.00, 21, 945000.00,
+    'eligible', 'Memenuhi syarat: Pegawai tetap (PKWTT), jarak 9.2km dibulatkan 9km, hadir 21 hari'
+  ),
+  (
+    (SELECT id FROM transport_allowance_periods WHERE period_year = 2026 AND period_month = 3),
+    (SELECT id FROM employees WHERE nip = 'EMP-013'),
+    5000.00, 6.70, 7.00, 7.00, 21, 735000.00,
+    'eligible', 'Memenuhi syarat: Pegawai tetap (PKWTT), jarak 6.7km dibulatkan 7km, hadir 21 hari'
+  ),
+  (
+    (SELECT id FROM transport_allowance_periods WHERE period_year = 2026 AND period_month = 3),
+    (SELECT id FROM employees WHERE nip = 'EMP-014'),
+    5000.00, 10.50, 11.00, 11.00, 21, 1155000.00,
+    'eligible', 'Memenuhi syarat: Pegawai tetap (PKWTT), jarak 10.5km dibulatkan 11km, hadir 21 hari'
+  ),
+  (
+    (SELECT id FROM transport_allowance_periods WHERE period_year = 2026 AND period_month = 3),
+    (SELECT id FROM employees WHERE nip = 'EMP-019'),
+    5000.00, 7.00, 7.00, 7.00, 22, 770000.00,
+    'eligible', 'Memenuhi syarat: Pegawai tetap (PKWTT), jarak 7.0km dibulatkan 7km, hadir 22 hari'
+  ),
+  (
+    (SELECT id FROM transport_allowance_periods WHERE period_year = 2026 AND period_month = 3),
+    (SELECT id FROM employees WHERE nip = 'EMP-020'),
+    5000.00, 9.00, 9.00, 9.00, 21, 945000.00,
+    'eligible', 'Memenuhi syarat: Pegawai tetap (PKWTT), jarak 9.0km dibulatkan 9km, hadir 21 hari'
+  ),
+  (
+    (SELECT id FROM transport_allowance_periods WHERE period_year = 2026 AND period_month = 3),
+    (SELECT id FROM employees WHERE nip = 'EMP-022'),
+    5000.00, 11.20, 11.00, 11.00, 21, 1155000.00,
+    'eligible', 'Memenuhi syarat: Pegawai tetap (PKWTT), jarak 11.2km dibulatkan 11km, hadir 21 hari'
+  ),
+  (
+    (SELECT id FROM transport_allowance_periods WHERE period_year = 2026 AND period_month = 4),
+    (SELECT id FROM employees WHERE nip = 'EMP-001'),
+    5000.00, 8.50, 9.00, 9.00, 20, 900000.00,
+    'eligible', 'Memenuhi syarat: Pegawai tetap (PKWTT), jarak 8.5km dibulatkan 9km, hadir 20 hari'
+  ),
+  (
+    (SELECT id FROM transport_allowance_periods WHERE period_year = 2026 AND period_month = 4),
+    (SELECT id FROM employees WHERE nip = 'EMP-004'),
+    5000.00, 6.00, 6.00, 6.00, 20, 600000.00,
+    'eligible', 'Memenuhi syarat: Pegawai tetap (PKWTT), jarak 6.0km dibulatkan 6km, hadir 20 hari'
+  ),
+  (
+    (SELECT id FROM transport_allowance_periods WHERE period_year = 2026 AND period_month = 4),
+    (SELECT id FROM employees WHERE nip = 'EMP-007'),
+    5000.00, 28.00, 28.00, 25.00, 21, 2625000.00,
+    'eligible', 'Memenuhi syarat: Pegawai tetap (PKWTT), jarak 28.0km dibulatkan 28km (jarak riil 28km dicap maksimal 25km), hadir 21 hari'
+  ),
+  (
+    (SELECT id FROM transport_allowance_periods WHERE period_year = 2026 AND period_month = 4),
+    (SELECT id FROM employees WHERE nip = 'EMP-008'),
+    5000.00, 9.20, 9.00, 9.00, 20, 900000.00,
+    'eligible', 'Memenuhi syarat: Pegawai tetap (PKWTT), jarak 9.2km dibulatkan 9km, hadir 20 hari'
+  ),
+  (
+    (SELECT id FROM transport_allowance_periods WHERE period_year = 2026 AND period_month = 4),
+    (SELECT id FROM employees WHERE nip = 'EMP-013'),
+    5000.00, 6.70, 7.00, 7.00, 20, 700000.00,
+    'eligible', 'Memenuhi syarat: Pegawai tetap (PKWTT), jarak 6.7km dibulatkan 7km, hadir 20 hari'
+  ),
+  (
+    (SELECT id FROM transport_allowance_periods WHERE period_year = 2026 AND period_month = 4),
+    (SELECT id FROM employees WHERE nip = 'EMP-014'),
+    5000.00, 10.50, 11.00, 11.00, 19, 1045000.00,
+    'eligible', 'Memenuhi syarat: Pegawai tetap (PKWTT), jarak 10.5km dibulatkan 11km, hadir 19 hari'
+  ),
+  (
+    (SELECT id FROM transport_allowance_periods WHERE period_year = 2026 AND period_month = 4),
+    (SELECT id FROM employees WHERE nip = 'EMP-019'),
+    5000.00, 7.00, 7.00, 7.00, 21, 735000.00,
+    'eligible', 'Memenuhi syarat: Pegawai tetap (PKWTT), jarak 7.0km dibulatkan 7km, hadir 21 hari'
+  ),
+  (
+    (SELECT id FROM transport_allowance_periods WHERE period_year = 2026 AND period_month = 4),
+    (SELECT id FROM employees WHERE nip = 'EMP-020'),
+    5000.00, 9.00, 9.00, 9.00, 20, 900000.00,
+    'eligible', 'Memenuhi syarat: Pegawai tetap (PKWTT), jarak 9.0km dibulatkan 9km, hadir 20 hari'
+  ),
+  (
+    (SELECT id FROM transport_allowance_periods WHERE period_year = 2026 AND period_month = 4),
+    (SELECT id FROM employees WHERE nip = 'EMP-022'),
+    5000.00, 11.20, 11.00, 11.00, 20, 1100000.00,
+    'eligible', 'Memenuhi syarat: Pegawai tetap (PKWTT), jarak 11.2km dibulatkan 11km, hadir 20 hari'
+  ),
+  (
+    (SELECT id FROM transport_allowance_periods WHERE period_year = 2026 AND period_month = 5),
+    (SELECT id FROM employees WHERE nip = 'EMP-001'),
+    5000.00, 8.50, 9.00, 9.00, 21, 945000.00,
+    'eligible', 'Memenuhi syarat: Pegawai tetap (PKWTT), jarak 8.5km dibulatkan 9km, hadir 21 hari'
+  ),
+  (
+    (SELECT id FROM transport_allowance_periods WHERE period_year = 2026 AND period_month = 5),
+    (SELECT id FROM employees WHERE nip = 'EMP-004'),
+    5000.00, 6.00, 6.00, 6.00, 21, 630000.00,
+    'eligible', 'Memenuhi syarat: Pegawai tetap (PKWTT), jarak 6.0km dibulatkan 6km, hadir 21 hari'
+  ),
+  (
+    (SELECT id FROM transport_allowance_periods WHERE period_year = 2026 AND period_month = 5),
+    (SELECT id FROM employees WHERE nip = 'EMP-007'),
+    5000.00, 28.00, 28.00, 25.00, 22, 2750000.00,
+    'eligible', 'Memenuhi syarat: Pegawai tetap (PKWTT), jarak 28.0km dibulatkan 28km (jarak riil 28km dicap maksimal 25km), hadir 22 hari'
+  ),
+  (
+    (SELECT id FROM transport_allowance_periods WHERE period_year = 2026 AND period_month = 5),
+    (SELECT id FROM employees WHERE nip = 'EMP-008'),
+    5000.00, 9.20, 9.00, 9.00, 20, 900000.00,
+    'eligible', 'Memenuhi syarat: Pegawai tetap (PKWTT), jarak 9.2km dibulatkan 9km, hadir 20 hari'
+  ),
+  (
+    (SELECT id FROM transport_allowance_periods WHERE period_year = 2026 AND period_month = 5),
+    (SELECT id FROM employees WHERE nip = 'EMP-013'),
+    5000.00, 6.70, 7.00, 7.00, 21, 735000.00,
+    'eligible', 'Memenuhi syarat: Pegawai tetap (PKWTT), jarak 6.7km dibulatkan 7km, hadir 21 hari'
+  ),
+  (
+    (SELECT id FROM transport_allowance_periods WHERE period_year = 2026 AND period_month = 5),
+    (SELECT id FROM employees WHERE nip = 'EMP-014'),
+    5000.00, 10.50, 11.00, 11.00, 21, 1155000.00,
+    'eligible', 'Memenuhi syarat: Pegawai tetap (PKWTT), jarak 10.5km dibulatkan 11km, hadir 21 hari'
+  ),
+  (
+    (SELECT id FROM transport_allowance_periods WHERE period_year = 2026 AND period_month = 5),
+    (SELECT id FROM employees WHERE nip = 'EMP-019'),
+    5000.00, 7.00, 7.00, 7.00, 22, 770000.00,
+    'eligible', 'Memenuhi syarat: Pegawai tetap (PKWTT), jarak 7.0km dibulatkan 7km, hadir 22 hari'
+  ),
+  (
+    (SELECT id FROM transport_allowance_periods WHERE period_year = 2026 AND period_month = 5),
+    (SELECT id FROM employees WHERE nip = 'EMP-020'),
+    5000.00, 9.00, 9.00, 9.00, 21, 945000.00,
+    'eligible', 'Memenuhi syarat: Pegawai tetap (PKWTT), jarak 9.0km dibulatkan 9km, hadir 21 hari'
+  ),
+  (
+    (SELECT id FROM transport_allowance_periods WHERE period_year = 2026 AND period_month = 5),
+    (SELECT id FROM employees WHERE nip = 'EMP-022'),
+    5000.00, 11.20, 11.00, 11.00, 21, 1155000.00,
+    'eligible', 'Memenuhi syarat: Pegawai tetap (PKWTT), jarak 11.2km dibulatkan 11km, hadir 21 hari'
+  ),
+  (
+    (SELECT id FROM transport_allowance_periods WHERE period_year = 2026 AND period_month = 6),
+    (SELECT id FROM employees WHERE nip = 'EMP-001'),
+    5000.00, 8.50, 9.00, 9.00, 21, 945000.00,
+    'eligible', 'Memenuhi syarat: Pegawai tetap (PKWTT), jarak 8.5km dibulatkan 9km, hadir 21 hari'
+  ),
+  (
+    (SELECT id FROM transport_allowance_periods WHERE period_year = 2026 AND period_month = 6),
+    (SELECT id FROM employees WHERE nip = 'EMP-004'),
+    5000.00, 6.00, 6.00, 6.00, 20, 600000.00,
+    'eligible', 'Memenuhi syarat: Pegawai tetap (PKWTT), jarak 6.0km dibulatkan 6km, hadir 20 hari'
+  ),
+  (
+    (SELECT id FROM transport_allowance_periods WHERE period_year = 2026 AND period_month = 6),
+    (SELECT id FROM employees WHERE nip = 'EMP-007'),
+    5000.00, 28.00, 28.00, 25.00, 21, 2625000.00,
+    'eligible', 'Memenuhi syarat: Pegawai tetap (PKWTT), jarak 28.0km dibulatkan 28km (jarak riil 28km dicap maksimal 25km), hadir 21 hari'
+  ),
+  (
+    (SELECT id FROM transport_allowance_periods WHERE period_year = 2026 AND period_month = 6),
+    (SELECT id FROM employees WHERE nip = 'EMP-008'),
+    5000.00, 9.20, 9.00, 9.00, 20, 900000.00,
+    'eligible', 'Memenuhi syarat: Pegawai tetap (PKWTT), jarak 9.2km dibulatkan 9km, hadir 20 hari'
+  ),
+  (
+    (SELECT id FROM transport_allowance_periods WHERE period_year = 2026 AND period_month = 6),
+    (SELECT id FROM employees WHERE nip = 'EMP-013'),
+    5000.00, 6.70, 7.00, 7.00, 20, 700000.00,
+    'eligible', 'Memenuhi syarat: Pegawai tetap (PKWTT), jarak 6.7km dibulatkan 7km, hadir 20 hari'
+  ),
+  (
+    (SELECT id FROM transport_allowance_periods WHERE period_year = 2026 AND period_month = 6),
+    (SELECT id FROM employees WHERE nip = 'EMP-014'),
+    5000.00, 10.50, 11.00, 11.00, 20, 1100000.00,
+    'eligible', 'Memenuhi syarat: Pegawai tetap (PKWTT), jarak 10.5km dibulatkan 11km, hadir 20 hari'
+  ),
+  (
+    (SELECT id FROM transport_allowance_periods WHERE period_year = 2026 AND period_month = 6),
+    (SELECT id FROM employees WHERE nip = 'EMP-019'),
+    5000.00, 7.00, 7.00, 7.00, 21, 735000.00,
+    'eligible', 'Memenuhi syarat: Pegawai tetap (PKWTT), jarak 7.0km dibulatkan 7km, hadir 21 hari'
+  ),
+  (
+    (SELECT id FROM transport_allowance_periods WHERE period_year = 2026 AND period_month = 6),
+    (SELECT id FROM employees WHERE nip = 'EMP-020'),
+    5000.00, 9.00, 9.00, 9.00, 20, 900000.00,
+    'eligible', 'Memenuhi syarat: Pegawai tetap (PKWTT), jarak 9.0km dibulatkan 9km, hadir 20 hari'
+  ),
+  (
+    (SELECT id FROM transport_allowance_periods WHERE period_year = 2026 AND period_month = 6),
+    (SELECT id FROM employees WHERE nip = 'EMP-022'),
+    5000.00, 11.20, 11.00, 11.00, 21, 1155000.00,
+    'eligible', 'Memenuhi syarat: Pegawai tetap (PKWTT), jarak 11.2km dibulatkan 11km, hadir 21 hari'
+  ),
+  (
+    (SELECT id FROM transport_allowance_periods WHERE period_year = 2026 AND period_month = 7),
+    (SELECT id FROM employees WHERE nip = 'EMP-001'),
+    5000.00, 8.50, 9.00, 9.00, 22, 990000.00,
+    'eligible', 'Memenuhi syarat: Pegawai tetap (PKWTT), jarak 8.5km dibulatkan 9km, hadir 22 hari'
+  ),
+  (
+    (SELECT id FROM transport_allowance_periods WHERE period_year = 2026 AND period_month = 7),
+    (SELECT id FROM employees WHERE nip = 'EMP-004'),
+    5000.00, 6.00, 6.00, 6.00, 21, 630000.00,
+    'eligible', 'Memenuhi syarat: Pegawai tetap (PKWTT), jarak 6.0km dibulatkan 6km, hadir 21 hari'
+  ),
+  (
+    (SELECT id FROM transport_allowance_periods WHERE period_year = 2026 AND period_month = 7),
+    (SELECT id FROM employees WHERE nip = 'EMP-007'),
+    5000.00, 28.00, 28.00, 25.00, 21, 2625000.00,
+    'eligible', 'Memenuhi syarat: Pegawai tetap (PKWTT), jarak 28.0km dibulatkan 28km (jarak riil 28km dicap maksimal 25km), hadir 21 hari'
+  ),
+  (
+    (SELECT id FROM transport_allowance_periods WHERE period_year = 2026 AND period_month = 7),
+    (SELECT id FROM employees WHERE nip = 'EMP-008'),
+    5000.00, 9.20, 9.00, 9.00, 21, 945000.00,
+    'eligible', 'Memenuhi syarat: Pegawai tetap (PKWTT), jarak 9.2km dibulatkan 9km, hadir 21 hari'
+  ),
+  (
+    (SELECT id FROM transport_allowance_periods WHERE period_year = 2026 AND period_month = 7),
+    (SELECT id FROM employees WHERE nip = 'EMP-013'),
+    5000.00, 6.70, 7.00, 7.00, 22, 770000.00,
+    'eligible', 'Memenuhi syarat: Pegawai tetap (PKWTT), jarak 6.7km dibulatkan 7km, hadir 22 hari'
+  ),
+  (
+    (SELECT id FROM transport_allowance_periods WHERE period_year = 2026 AND period_month = 7),
+    (SELECT id FROM employees WHERE nip = 'EMP-014'),
+    5000.00, 10.50, 11.00, 11.00, 20, 1100000.00,
+    'eligible', 'Memenuhi syarat: Pegawai tetap (PKWTT), jarak 10.5km dibulatkan 11km, hadir 20 hari'
+  ),
+  (
+    (SELECT id FROM transport_allowance_periods WHERE period_year = 2026 AND period_month = 7),
+    (SELECT id FROM employees WHERE nip = 'EMP-019'),
+    5000.00, 7.00, 7.00, 7.00, 21, 735000.00,
+    'eligible', 'Memenuhi syarat: Pegawai tetap (PKWTT), jarak 7.0km dibulatkan 7km, hadir 21 hari'
+  ),
+  (
+    (SELECT id FROM transport_allowance_periods WHERE period_year = 2026 AND period_month = 7),
+    (SELECT id FROM employees WHERE nip = 'EMP-020'),
+    5000.00, 9.00, 9.00, 9.00, 22, 990000.00,
+    'eligible', 'Memenuhi syarat: Pegawai tetap (PKWTT), jarak 9.0km dibulatkan 9km, hadir 22 hari'
+  ),
+  (
+    (SELECT id FROM transport_allowance_periods WHERE period_year = 2026 AND period_month = 7),
+    (SELECT id FROM employees WHERE nip = 'EMP-022'),
+    5000.00, 11.20, 11.00, 11.00, 20, 1100000.00,
+    'eligible', 'Memenuhi syarat: Pegawai tetap (PKWTT), jarak 11.2km dibulatkan 11km, hadir 20 hari'
+  ),
+  (
+    (SELECT id FROM transport_allowance_periods WHERE period_year = 2026 AND period_month = 8),
+    (SELECT id FROM employees WHERE nip = 'EMP-001'),
+    5000.00, 8.50, 9.00, 9.00, 21, 945000.00,
+    'eligible', 'Memenuhi syarat: Pegawai tetap (PKWTT), jarak 8.5km dibulatkan 9km, hadir 21 hari'
+  ),
+  (
+    (SELECT id FROM transport_allowance_periods WHERE period_year = 2026 AND period_month = 8),
+    (SELECT id FROM employees WHERE nip = 'EMP-004'),
+    5000.00, 6.00, 6.00, 6.00, 21, 630000.00,
+    'eligible', 'Memenuhi syarat: Pegawai tetap (PKWTT), jarak 6.0km dibulatkan 6km, hadir 21 hari'
+  ),
+  (
+    (SELECT id FROM transport_allowance_periods WHERE period_year = 2026 AND period_month = 8),
+    (SELECT id FROM employees WHERE nip = 'EMP-007'),
+    5000.00, 28.00, 28.00, 25.00, 22, 2750000.00,
+    'eligible', 'Memenuhi syarat: Pegawai tetap (PKWTT), jarak 28.0km dibulatkan 28km (jarak riil 28km dicap maksimal 25km), hadir 22 hari'
+  ),
+  (
+    (SELECT id FROM transport_allowance_periods WHERE period_year = 2026 AND period_month = 8),
+    (SELECT id FROM employees WHERE nip = 'EMP-008'),
+    5000.00, 9.20, 9.00, 9.00, 20, 900000.00,
+    'eligible', 'Memenuhi syarat: Pegawai tetap (PKWTT), jarak 9.2km dibulatkan 9km, hadir 20 hari'
+  ),
+  (
+    (SELECT id FROM transport_allowance_periods WHERE period_year = 2026 AND period_month = 8),
+    (SELECT id FROM employees WHERE nip = 'EMP-013'),
+    5000.00, 6.70, 7.00, 7.00, 21, 735000.00,
+    'eligible', 'Memenuhi syarat: Pegawai tetap (PKWTT), jarak 6.7km dibulatkan 7km, hadir 21 hari'
+  ),
+  (
+    (SELECT id FROM transport_allowance_periods WHERE period_year = 2026 AND period_month = 8),
+    (SELECT id FROM employees WHERE nip = 'EMP-014'),
+    5000.00, 10.50, 11.00, 11.00, 19, 1045000.00,
+    'eligible', 'Memenuhi syarat: Pegawai tetap (PKWTT), jarak 10.5km dibulatkan 11km, hadir 19 hari'
+  ),
+  (
+    (SELECT id FROM transport_allowance_periods WHERE period_year = 2026 AND period_month = 8),
+    (SELECT id FROM employees WHERE nip = 'EMP-019'),
+    5000.00, 7.00, 7.00, 7.00, 22, 770000.00,
+    'eligible', 'Memenuhi syarat: Pegawai tetap (PKWTT), jarak 7.0km dibulatkan 7km, hadir 22 hari'
+  ),
+  (
+    (SELECT id FROM transport_allowance_periods WHERE period_year = 2026 AND period_month = 8),
+    (SELECT id FROM employees WHERE nip = 'EMP-020'),
+    5000.00, 9.00, 9.00, 9.00, 20, 900000.00,
+    'eligible', 'Memenuhi syarat: Pegawai tetap (PKWTT), jarak 9.0km dibulatkan 9km, hadir 20 hari'
+  ),
+  (
+    (SELECT id FROM transport_allowance_periods WHERE period_year = 2026 AND period_month = 8),
+    (SELECT id FROM employees WHERE nip = 'EMP-022'),
+    5000.00, 11.20, 11.00, 11.00, 21, 1155000.00,
+    'eligible', 'Memenuhi syarat: Pegawai tetap (PKWTT), jarak 11.2km dibulatkan 11km, hadir 21 hari'
+  )
+ON DUPLICATE KEY UPDATE
+  base_fare = VALUES(base_fare),
+  original_km = VALUES(original_km),
+  rounded_km = VALUES(rounded_km),
+  effective_km = VALUES(effective_km),
+  attendance_days = VALUES(attendance_days),
+  nominal = VALUES(nominal),
+  eligibility_status = VALUES(eligibility_status),
+  calculation_note = VALUES(calculation_note);
 
 COMMIT;
