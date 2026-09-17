@@ -108,9 +108,20 @@ export const useAuth = () => {
 
   /**
    * Check if user has action permission ('create' | 'read' | 'update' | 'delete') on a module
+   * Supports both can(action, moduleCode) and can(moduleCode, action)
    */
-  const can = (action, moduleCode) => {
+  const can = (param1, param2) => {
     if (!permissions.value || permissions.value.length === 0) return false;
+
+    const validActions = ["create", "read", "update", "delete"];
+    let action = param1;
+    let moduleCode = param2;
+
+    if (!validActions.includes(param1) && validActions.includes(param2)) {
+      action = param2;
+      moduleCode = param1;
+    }
+
     const perm = permissions.value.find((p) => p.module_code === moduleCode);
     if (!perm || !perm.can_access) return false;
 
@@ -130,9 +141,20 @@ export const useAuth = () => {
 
   /**
    * Get data scope ('all' | 'own' | 'no') for a specific action on a module
+   * Supports both getScope(action, moduleCode) and getScope(moduleCode, action)
    */
-  const getScope = (action, moduleCode) => {
+  const getScope = (param1, param2) => {
     if (!permissions.value || permissions.value.length === 0) return "no";
+
+    const validActions = ["create", "read", "update", "delete"];
+    let action = param1;
+    let moduleCode = param2;
+
+    if (!validActions.includes(param1) && validActions.includes(param2)) {
+      action = param2;
+      moduleCode = param1;
+    }
+
     const perm = permissions.value.find((p) => p.module_code === moduleCode);
     if (!perm || !perm.can_access) return "no";
 

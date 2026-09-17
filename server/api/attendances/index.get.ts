@@ -1,6 +1,8 @@
 import { query } from "#server/utils/database";
+import { requirePermission } from "#server/utils/rbac";
 
 export default defineEventHandler(async (event) => {
+  await requirePermission(event, "attendance", "read");
   const filters = getQuery(event);
   const params: unknown[] = [];
   let where = "";

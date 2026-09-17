@@ -13,7 +13,7 @@ export const openApiDocument = {
     { name: "Employees", description: "Modul pengelolaan data pegawai (CRUD, filter, search, bulk action, export)" },
     { name: "Wilayah", description: "Master data wilayah dan pencarian kecamatan autocomplete" },
     { name: "Departments", description: "Data departemen" },
-    { name: "Attendances", description: "Data absensi" },
+    { name: "Attendances", description: "Modul Presensi: Rekapitulasi bulanan seluruh pegawai, riwayat detail harian, import CSV, template download, dan CRUD presensi" },
     { name: "Roles", description: "Manajemen data role dan hak akses modul (RBAC)" },
     { name: "Users", description: "Manajemen data user pengguna sistem" },
     { name: "Positions", description: "Master data jabatan pegawai" },
@@ -582,23 +582,96 @@ export const openApiDocument = {
         },
       },
     },
+    "/api/attendances/summary": {
+      get: {
+        tags: ["Attendances"],
+        summary: "Dapatkan rekapitulasi presensi seluruh pegawai (default N-1 bulan berjalan)",
+        parameters: [
+          { name: "year", in: "query", required: false, schema: { type: "integer", example: 2026 }, description: "Tahun periode (default: tahun N-1 bulan)" },
+          { name: "month", in: "query", required: false, schema: { type: "integer", example: 8 }, description: "Bulan periode (1-12, default: N-1 bulan berjalan)" },
+          { name: "search", in: "query", required: false, schema: { type: "string" }, description: "Pencarian nama/NIP/jabatan pegawai" },
+          { name: "page", in: "query", required: false, schema: { type: "integer", default: 1 } },
+          { name: "limit", in: "query", required: false, schema: { type: "integer", default: 10 } },
+        ],
+        responses: {
+          200: { description: "Daftar rekapitulasi presensi pegawai per periode" },
+          401: { description: "Belum login" },
+          403: { description: "Tidak memiliki hak akses ke modul presensi" },
+          500: { $ref: "#/components/responses/ServerError" },
+        },
+      },
+    },
+    "/api/attendances/{id}": {
+      get: {
+        tags: ["Attendances"],
+        summary: "Dapatkan riwayat presensi harian & statistik bulanan pegawai berdasarkan ID pegawai",
+        parameters: [
+          { name: "id", in: "path", required: true, schema: { type: "integer" }, description: "ID Pegawai" },
+          { name: "year", in: "query", required: false, schema: { type: "integer", example: 2026 } },
+          { name: "month", in: "query", required: false, schema: { type: "integer", example: 8 } },
+        ],
+        responses: {
+          200: { description: "Detail presensi pegawai dan statistik kehadiran bulanan" },
+          401: { description: "Belum login" },
+          403: { description: "Tidak memiliki hak akses" },
+          404: { description: "Pegawai tidak ditemukan" },
+        },
+      },
+      put: {
+        tags: ["Attendances"],
+        summary: "Perbarui data catatan presensi harian pegawai (Khusus Admin HRD)",
+        parameters: [
+          { name: "id", in: "path", required: true, schema: { type: "integer" }, description: "ID Record Presensi" },
+        ],
+        requestBody: {
+          required: true,
+          content: {
+            "application/json": {
+              schema: {
+                type: "object",
+                properties: {
+                  attendance_date: { type: "string", format: "date", example: "2026-08-03" },
+                  attendance_type: { type: "string", enum: ["hadir", "cuti", "izin", "unpaid_leave"], example: "hadir" },
+                  checkin_location: { type: "string", enum: ["Gedung Utama", "Gedung A", "Gedung B"], example: "Gedung Utama" },
+                  checkout_location: { type: "string", enum: ["Gedung Utama", "Gedung A", "Gedung B"], example: "Gedung Utama" },
+                  checkin_time: { type: "string", example: "08:00:00" },
+                  checkout_time: { type: "string", example: "17:00:00" },
+                  verification_status: { type: "string", enum: ["Disetujui", "Ditolak"], example: "Disetujui" },
+                  verified_by_role: { type: "string", enum: ["Lead", "Manager", "HRD"], example: "HRD" },
+                  remarks: { type: "string", example: "Keterangan revisi presensi" },
+                },
+              },
+            },
+          },
+        },
+        responses: {
+          200: { description: "Data presensi berhasil diperbarui dan rekap bulanan disinkronkan" },
+          401: { description: "Belum login" },
+          403: { description: "Hanya Admin HRD yang memiliki hak akses CUD presensi" },
+          404: { description: "Data presensi tidak ditemukan" },
+        },
+      },
+      delete: {
+        tags: ["Attendances"],
+        summary: "Hapus catatan presensi harian pegawai (Khusus Admin HRD)",
+        parameters: [
+          { name: "id", in: "path", required: true, schema: { type: "integer" }, description: "ID Record Presensi" },
+        ],
+        responses: {
+          200: { description: "Data presensi berhasil dihapus dan rekap bulanan disinkronkan" },
+          401: { description: "Belum login" },
+          403: { description: "Hanya Admin HRD yang berhak menghapus data presensi" },
+          404: { description: "Data presensi tidak ditemukan" },
+        },
+      },
+    },
     "/api/attendances": {
       get: {
         tags: ["Attendances"],
-        summary: "Ambil data absensi",
+        summary: "Ambil daftar data presensi pegawai (Filter Query)",
         parameters: [
-          {
-            name: "date",
-            in: "query",
-            required: false,
-            schema: { type: "string", format: "date", example: "2026-09-16" },
-          },
-          {
-            name: "departmentId",
-            in: "query",
-            required: false,
-            schema: { type: "integer", example: 1 },
-          },
+          { name: "date", in: "query", required: false, schema: { type: "string", format: "date", example: "2026-09-16" } },
+          { name: "departmentId", in: "query", required: false, schema: { type: "integer", example: 1 } },
         ],
         responses: {
           200: {
@@ -613,6 +686,91 @@ export const openApiDocument = {
             },
           },
           500: { $ref: "#/components/responses/ServerError" },
+        },
+      },
+      post: {
+        tags: ["Attendances"],
+        summary: "Tambah data presensi harian manual dengan validasi aturan jam kerja (Khusus Admin HRD)",
+        requestBody: {
+          required: true,
+          content: {
+            "application/json": {
+              schema: {
+                type: "object",
+                required: ["employee_id", "attendance_date", "attendance_type"],
+                properties: {
+                  employee_id: { type: "integer", example: 1 },
+                  attendance_date: { type: "string", format: "date", example: "2026-08-03" },
+                  attendance_type: { type: "string", enum: ["hadir", "cuti", "izin", "unpaid_leave"], example: "hadir" },
+                  checkin_location: { type: "string", enum: ["Gedung Utama", "Gedung A", "Gedung B"], example: "Gedung Utama" },
+                  checkout_location: { type: "string", enum: ["Gedung Utama", "Gedung A", "Gedung B"], example: "Gedung Utama" },
+                  checkin_time: { type: "string", example: "08:00:00" },
+                  checkout_time: { type: "string", example: "17:00:00" },
+                  verification_status: { type: "string", enum: ["Disetujui", "Ditolak"], default: "Disetujui" },
+                  verified_by_role: { type: "string", enum: ["Lead", "Manager", "HRD"], default: "HRD" },
+                  remarks: { type: "string", example: "Tepat waktu" },
+                },
+              },
+            },
+          },
+        },
+        responses: {
+          200: { description: "Data presensi berhasil disimpan dan rekap dihitung ulang" },
+          401: { description: "Belum login" },
+          403: { description: "Akses ditolak (Hanya Admin HRD)" },
+          422: { description: "Validasi data gagal" },
+        },
+      },
+    },
+    "/api/attendances/template": {
+      get: {
+        tags: ["Attendances"],
+        summary: "Unduh file template CSV untuk import presensi pegawai",
+        responses: {
+          200: {
+            description: "File CSV template siap pakai dengan header kolom dan baris sampel",
+            content: {
+              "text/csv": {
+                schema: { type: "string", format: "binary" },
+              },
+            },
+          },
+        },
+      },
+    },
+    "/api/attendances/import": {
+      post: {
+        tags: ["Attendances"],
+        summary: "Upload dan proses import data presensi berbasis CSV (Khusus Admin HRD)",
+        requestBody: {
+          required: true,
+          content: {
+            "multipart/form-data": {
+              schema: {
+                type: "object",
+                required: ["file"],
+                properties: {
+                  file: { type: "string", format: "binary", description: "File presensi berekstensi .csv" },
+                },
+              },
+            },
+            "application/json": {
+              schema: {
+                type: "object",
+                required: ["csvContent"],
+                properties: {
+                  filename: { type: "string", example: "data-presensi-agustus.csv" },
+                  csvContent: { type: "string", description: "Konten teks CSV mentah" },
+                },
+              },
+            },
+          },
+        },
+        responses: {
+          200: { description: "Import berhasil diproses dengan statistik baris sukses/gagal" },
+          400: { description: "File CSV tidak ditemukan" },
+          403: { description: "Akses ditolak (Hanya Admin HRD)" },
+          422: { description: "Format CSV tidak valid" },
         },
       },
     },

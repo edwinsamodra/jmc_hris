@@ -473,22 +473,117 @@ ON DUPLICATE KEY UPDATE
   password = VALUES(password),
   status = VALUES(status);
 
--- Master Absensi
+-- Master Absensi Harian (Agustus & September 2026)
+-- 1. EMP-001 (Ahmad Hermawan): Hadir 21 hari penuh (100%) di Gedung Utama -> Status Hadir: Terpenuhi
 INSERT INTO attendances (
   employee_id, attendance_date, checkin_at, checkout_at,
   checkin_location, checkout_location, attendance_type,
-  duration_hours, status, verification_status, remarks
+  duration_hours, status, verification_status, verified_by_role, remarks
 ) VALUES
-  ((SELECT id FROM employees WHERE nip = 'EMP-001'), '2026-09-16',
-   '2026-09-16 08:01:00', '2026-09-16 17:03:00', 'Kantor', 'Kantor',
-   'hadir', 9.03, 'terpenuhi', 'verified', 'Hadir tepat waktu'),
-  ((SELECT id FROM employees WHERE nip = 'EMP-002'), '2026-09-16',
-   NULL, NULL, NULL, NULL, 'cuti', NULL, 'terpenuhi', 'verified', 'Cuti tahunan'),
-  ((SELECT id FROM employees WHERE nip = 'EMP-003'), '2026-09-16',
-   '2026-09-16 08:10:00', '2026-09-16 17:00:00', 'Kantor', 'Kantor',
-   'hadir', 8.83, 'terpenuhi', 'verified', NULL)
-ON DUPLICATE KEY UPDATE checkin_at = VALUES(checkin_at),
-  checkout_at = VALUES(checkout_at), attendance_type = VALUES(attendance_type),
-  duration_hours = VALUES(duration_hours), status = VALUES(status), remarks = VALUES(remarks);
+  ((SELECT id FROM employees WHERE nip = 'EMP-001'), '2026-08-03', '2026-08-03 08:00:00', '2026-08-03 17:00:00', 'Gedung Utama', 'Gedung Utama', 'hadir', 8.00, 'terpenuhi', 'Disetujui', 'HRD', 'Hadir tepat waktu'),
+  ((SELECT id FROM employees WHERE nip = 'EMP-001'), '2026-08-04', '2026-08-04 08:02:00', '2026-08-04 17:05:00', 'Gedung Utama', 'Gedung Utama', 'hadir', 8.05, 'terpenuhi', 'Disetujui', 'HRD', 'Hadir tepat waktu'),
+  ((SELECT id FROM employees WHERE nip = 'EMP-001'), '2026-08-05', '2026-08-05 07:58:00', '2026-08-05 17:00:00', 'Gedung Utama', 'Gedung Utama', 'hadir', 8.03, 'terpenuhi', 'Disetujui', 'HRD', 'Hadir tepat waktu'),
+  ((SELECT id FROM employees WHERE nip = 'EMP-001'), '2026-08-06', '2026-08-06 08:05:00', '2026-08-06 17:10:00', 'Gedung Utama', 'Gedung Utama', 'hadir', 8.08, 'terpenuhi', 'Disetujui', 'HRD', 'Hadir tepat waktu'),
+  ((SELECT id FROM employees WHERE nip = 'EMP-001'), '2026-08-07', '2026-08-07 08:00:00', '2026-08-07 17:00:00', 'Gedung Utama', 'Gedung Utama', 'hadir', 8.00, 'terpenuhi', 'Disetujui', 'HRD', 'Hadir tepat waktu'),
+  ((SELECT id FROM employees WHERE nip = 'EMP-001'), '2026-08-10', '2026-08-10 08:01:00', '2026-08-10 17:02:00', 'Gedung Utama', 'Gedung Utama', 'hadir', 8.02, 'terpenuhi', 'Disetujui', 'HRD', 'Hadir tepat waktu'),
+  ((SELECT id FROM employees WHERE nip = 'EMP-001'), '2026-08-11', '2026-08-11 08:03:00', '2026-08-11 17:04:00', 'Gedung Utama', 'Gedung Utama', 'hadir', 8.02, 'terpenuhi', 'Disetujui', 'HRD', 'Hadir tepat waktu'),
+  ((SELECT id FROM employees WHERE nip = 'EMP-001'), '2026-08-12', '2026-08-12 08:00:00', '2026-08-12 17:00:00', 'Gedung Utama', 'Gedung Utama', 'hadir', 8.00, 'terpenuhi', 'Disetujui', 'HRD', 'Hadir tepat waktu'),
+  ((SELECT id FROM employees WHERE nip = 'EMP-001'), '2026-08-13', '2026-08-13 08:06:00', '2026-08-13 17:10:00', 'Gedung Utama', 'Gedung Utama', 'hadir', 8.07, 'terpenuhi', 'Disetujui', 'HRD', 'Hadir tepat waktu'),
+  ((SELECT id FROM employees WHERE nip = 'EMP-001'), '2026-08-14', '2026-08-14 08:00:00', '2026-08-14 17:00:00', 'Gedung Utama', 'Gedung Utama', 'hadir', 8.00, 'terpenuhi', 'Disetujui', 'HRD', 'Hadir tepat waktu'),
+  ((SELECT id FROM employees WHERE nip = 'EMP-001'), '2026-08-17', '2026-08-17 08:00:00', '2026-08-17 17:00:00', 'Gedung Utama', 'Gedung Utama', 'hadir', 8.00, 'terpenuhi', 'Disetujui', 'HRD', 'Upacara & Presensi'),
+  ((SELECT id FROM employees WHERE nip = 'EMP-001'), '2026-08-18', '2026-08-18 08:04:00', '2026-08-18 17:05:00', 'Gedung Utama', 'Gedung Utama', 'hadir', 8.02, 'terpenuhi', 'Disetujui', 'HRD', 'Hadir tepat waktu'),
+  ((SELECT id FROM employees WHERE nip = 'EMP-001'), '2026-08-19', '2026-08-19 08:00:00', '2026-08-19 17:00:00', 'Gedung Utama', 'Gedung Utama', 'hadir', 8.00, 'terpenuhi', 'Disetujui', 'HRD', 'Hadir tepat waktu'),
+  ((SELECT id FROM employees WHERE nip = 'EMP-001'), '2026-08-20', '2026-08-20 08:02:00', '2026-08-20 17:03:00', 'Gedung Utama', 'Gedung Utama', 'hadir', 8.02, 'terpenuhi', 'Disetujui', 'HRD', 'Hadir tepat waktu'),
+  ((SELECT id FROM employees WHERE nip = 'EMP-001'), '2026-08-21', '2026-08-21 08:01:00', '2026-08-21 17:05:00', 'Gedung Utama', 'Gedung Utama', 'hadir', 8.07, 'terpenuhi', 'Disetujui', 'HRD', 'Hadir tepat waktu'),
+  ((SELECT id FROM employees WHERE nip = 'EMP-001'), '2026-08-24', '2026-08-24 08:00:00', '2026-08-24 17:00:00', 'Gedung Utama', 'Gedung Utama', 'hadir', 8.00, 'terpenuhi', 'Disetujui', 'HRD', 'Hadir tepat waktu'),
+  ((SELECT id FROM employees WHERE nip = 'EMP-001'), '2026-08-25', '2026-08-25 08:05:00', '2026-08-25 17:10:00', 'Gedung Utama', 'Gedung Utama', 'hadir', 8.08, 'terpenuhi', 'Disetujui', 'HRD', 'Hadir tepat waktu'),
+  ((SELECT id FROM employees WHERE nip = 'EMP-001'), '2026-08-26', '2026-08-26 08:00:00', '2026-08-26 17:00:00', 'Gedung Utama', 'Gedung Utama', 'hadir', 8.00, 'terpenuhi', 'Disetujui', 'HRD', 'Hadir tepat waktu'),
+  ((SELECT id FROM employees WHERE nip = 'EMP-001'), '2026-08-27', '2026-08-27 08:03:00', '2026-08-27 17:05:00', 'Gedung Utama', 'Gedung Utama', 'hadir', 8.03, 'terpenuhi', 'Disetujui', 'HRD', 'Hadir tepat waktu'),
+  ((SELECT id FROM employees WHERE nip = 'EMP-001'), '2026-08-28', '2026-08-28 08:00:00', '2026-08-28 17:00:00', 'Gedung Utama', 'Gedung Utama', 'hadir', 8.00, 'terpenuhi', 'Disetujui', 'HRD', 'Hadir tepat waktu'),
+  ((SELECT id FROM employees WHERE nip = 'EMP-001'), '2026-08-31', '2026-08-31 08:00:00', '2026-08-31 17:00:00', 'Gedung Utama', 'Gedung Utama', 'hadir', 8.00, 'terpenuhi', 'Disetujui', 'HRD', 'Hadir tepat waktu'),
+
+  -- 2. EMP-002 (Dhea Angela): Hadir 20 hari di Gedung A + 1 hari Cuti -> Status Hadir: Terpenuhi (>= 20)
+  ((SELECT id FROM employees WHERE nip = 'EMP-002'), '2026-08-03', '2026-08-03 08:05:00', '2026-08-03 17:05:00', 'Gedung A', 'Gedung A', 'hadir', 8.00, 'terpenuhi', 'Disetujui', 'Manager', 'Hadir tepat waktu'),
+  ((SELECT id FROM employees WHERE nip = 'EMP-002'), '2026-08-04', '2026-08-04 08:10:00', '2026-08-04 17:15:00', 'Gedung A', 'Gedung A', 'hadir', 8.08, 'terpenuhi', 'Disetujui', 'Manager', 'Hadir tepat waktu'),
+  ((SELECT id FROM employees WHERE nip = 'EMP-002'), '2026-08-05', '2026-08-05 08:02:00', '2026-08-05 17:05:00', 'Gedung A', 'Gedung A', 'hadir', 8.05, 'terpenuhi', 'Disetujui', 'Manager', 'Hadir tepat waktu'),
+  ((SELECT id FROM employees WHERE nip = 'EMP-002'), '2026-08-06', '2026-08-06 08:00:00', '2026-08-06 17:00:00', 'Gedung A', 'Gedung A', 'hadir', 8.00, 'terpenuhi', 'Disetujui', 'Manager', 'Hadir tepat waktu'),
+  ((SELECT id FROM employees WHERE nip = 'EMP-002'), '2026-08-07', '2026-08-07 08:12:00', '2026-08-07 17:15:00', 'Gedung A', 'Gedung A', 'hadir', 8.05, 'terpenuhi', 'Disetujui', 'Manager', 'Toleransi 15 menit'),
+  ((SELECT id FROM employees WHERE nip = 'EMP-002'), '2026-08-10', '2026-08-10 08:00:00', '2026-08-10 17:00:00', 'Gedung A', 'Gedung A', 'hadir', 8.00, 'terpenuhi', 'Disetujui', 'Manager', 'Hadir tepat waktu'),
+  ((SELECT id FROM employees WHERE nip = 'EMP-002'), '2026-08-11', '2026-08-11 08:04:00', '2026-08-11 17:05:00', 'Gedung A', 'Gedung A', 'hadir', 8.02, 'terpenuhi', 'Disetujui', 'Manager', 'Hadir tepat waktu'),
+  ((SELECT id FROM employees WHERE nip = 'EMP-002'), '2026-08-12', '2026-08-12 08:00:00', '2026-08-12 17:00:00', 'Gedung A', 'Gedung A', 'hadir', 8.00, 'terpenuhi', 'Disetujui', 'Manager', 'Hadir tepat waktu'),
+  ((SELECT id FROM employees WHERE nip = 'EMP-002'), '2026-08-13', '2026-08-13 08:08:00', '2026-08-13 17:10:00', 'Gedung A', 'Gedung A', 'hadir', 8.03, 'terpenuhi', 'Disetujui', 'Manager', 'Hadir tepat waktu'),
+  ((SELECT id FROM employees WHERE nip = 'EMP-002'), '2026-08-14', '2026-08-14 08:00:00', '2026-08-14 17:00:00', 'Gedung A', 'Gedung A', 'hadir', 8.00, 'terpenuhi', 'Disetujui', 'Manager', 'Hadir tepat waktu'),
+  ((SELECT id FROM employees WHERE nip = 'EMP-002'), '2026-08-17', '2026-08-17 08:00:00', '2026-08-17 17:00:00', 'Gedung A', 'Gedung A', 'hadir', 8.00, 'terpenuhi', 'Disetujui', 'Manager', 'Upacara & Presensi'),
+  ((SELECT id FROM employees WHERE nip = 'EMP-002'), '2026-08-18', '2026-08-18 08:05:00', '2026-08-18 17:05:00', 'Gedung A', 'Gedung A', 'hadir', 8.00, 'terpenuhi', 'Disetujui', 'Manager', 'Hadir tepat waktu'),
+  ((SELECT id FROM employees WHERE nip = 'EMP-002'), '2026-08-19', '2026-08-19 08:00:00', '2026-08-19 17:00:00', 'Gedung A', 'Gedung A', 'hadir', 8.00, 'terpenuhi', 'Disetujui', 'Manager', 'Hadir tepat waktu'),
+  ((SELECT id FROM employees WHERE nip = 'EMP-002'), '2026-08-20', '2026-08-20 08:01:00', '2026-08-20 17:02:00', 'Gedung A', 'Gedung A', 'hadir', 8.02, 'terpenuhi', 'Disetujui', 'Manager', 'Hadir tepat waktu'),
+  ((SELECT id FROM employees WHERE nip = 'EMP-002'), '2026-08-21', '2026-08-21 08:00:00', '2026-08-21 17:00:00', 'Gedung A', 'Gedung A', 'hadir', 8.00, 'terpenuhi', 'Disetujui', 'Manager', 'Hadir tepat waktu'),
+  ((SELECT id FROM employees WHERE nip = 'EMP-002'), '2026-08-24', '2026-08-24 08:00:00', '2026-08-24 17:00:00', 'Gedung A', 'Gedung A', 'hadir', 8.00, 'terpenuhi', 'Disetujui', 'Manager', 'Hadir tepat waktu'),
+  ((SELECT id FROM employees WHERE nip = 'EMP-002'), '2026-08-25', '2026-08-25 08:07:00', '2026-08-25 17:10:00', 'Gedung A', 'Gedung A', 'hadir', 8.05, 'terpenuhi', 'Disetujui', 'Manager', 'Hadir tepat waktu'),
+  ((SELECT id FROM employees WHERE nip = 'EMP-002'), '2026-08-26', '2026-08-26 08:00:00', '2026-08-26 17:00:00', 'Gedung A', 'Gedung A', 'hadir', 8.00, 'terpenuhi', 'Disetujui', 'Manager', 'Hadir tepat waktu'),
+  ((SELECT id FROM employees WHERE nip = 'EMP-002'), '2026-08-27', '2026-08-27 08:05:00', '2026-08-27 17:05:00', 'Gedung A', 'Gedung A', 'hadir', 8.00, 'terpenuhi', 'Disetujui', 'Manager', 'Hadir tepat waktu'),
+  ((SELECT id FROM employees WHERE nip = 'EMP-002'), '2026-08-28', NULL, NULL, NULL, NULL, 'cuti', NULL, 'terpenuhi', 'Disetujui', 'Manager', 'Cuti Tahunan'),
+  ((SELECT id FROM employees WHERE nip = 'EMP-002'), '2026-08-31', '2026-08-31 08:00:00', '2026-08-31 17:00:00', 'Gedung A', 'Gedung A', 'hadir', 8.00, 'terpenuhi', 'Disetujui', 'Manager', 'Hadir tepat waktu'),
+
+  -- 3. EMP-003 (Riko Salim): Hadir 16 hari + 2 Cuti + 2 Izin + 1 Unpaid Leave -> Status Hadir: Tidak terpenuhi (< 20)
+  ((SELECT id FROM employees WHERE nip = 'EMP-003'), '2026-08-03', '2026-08-03 08:10:00', '2026-08-03 17:15:00', 'Gedung B', 'Gedung B', 'hadir', 8.08, 'terpenuhi', 'Disetujui', 'Lead', 'Hadir'),
+  ((SELECT id FROM employees WHERE nip = 'EMP-003'), '2026-08-04', '2026-08-04 08:00:00', '2026-08-04 17:00:00', 'Gedung B', 'Gedung B', 'hadir', 8.00, 'terpenuhi', 'Disetujui', 'Lead', 'Hadir'),
+  ((SELECT id FROM employees WHERE nip = 'EMP-003'), '2026-08-05', '2026-08-05 08:05:00', '2026-08-05 17:05:00', 'Gedung B', 'Gedung B', 'hadir', 8.00, 'terpenuhi', 'Disetujui', 'Lead', 'Hadir'),
+  ((SELECT id FROM employees WHERE nip = 'EMP-003'), '2026-08-06', '2026-08-06 08:00:00', '2026-08-06 17:00:00', 'Gedung B', 'Gedung B', 'hadir', 8.00, 'terpenuhi', 'Disetujui', 'Lead', 'Hadir'),
+  ((SELECT id FROM employees WHERE nip = 'EMP-003'), '2026-08-07', NULL, NULL, NULL, NULL, 'cuti', NULL, 'terpenuhi', 'Disetujui', 'HRD', 'Cuti Keluarga'),
+  ((SELECT id FROM employees WHERE nip = 'EMP-003'), '2026-08-10', NULL, NULL, NULL, NULL, 'cuti', NULL, 'terpenuhi', 'Disetujui', 'HRD', 'Cuti Keluarga'),
+  ((SELECT id FROM employees WHERE nip = 'EMP-003'), '2026-08-11', '2026-08-11 08:00:00', '2026-08-11 17:00:00', 'Gedung B', 'Gedung B', 'hadir', 8.00, 'terpenuhi', 'Disetujui', 'Lead', 'Hadir'),
+  ((SELECT id FROM employees WHERE nip = 'EMP-003'), '2026-08-12', '2026-08-12 08:00:00', '2026-08-12 17:00:00', 'Gedung B', 'Gedung B', 'hadir', 8.00, 'terpenuhi', 'Disetujui', 'Lead', 'Hadir'),
+  ((SELECT id FROM employees WHERE nip = 'EMP-003'), '2026-08-13', NULL, NULL, NULL, NULL, 'izin', NULL, 'terpenuhi', 'Disetujui', 'HRD', 'Izin Sakit'),
+  ((SELECT id FROM employees WHERE nip = 'EMP-003'), '2026-08-14', NULL, NULL, NULL, NULL, 'izin', NULL, 'terpenuhi', 'Disetujui', 'HRD', 'Izin Sakit'),
+  ((SELECT id FROM employees WHERE nip = 'EMP-003'), '2026-08-17', '2026-08-17 08:00:00', '2026-08-17 17:00:00', 'Gedung B', 'Gedung B', 'hadir', 8.00, 'terpenuhi', 'Disetujui', 'Lead', 'Upacara'),
+  ((SELECT id FROM employees WHERE nip = 'EMP-003'), '2026-08-18', '2026-08-18 08:00:00', '2026-08-18 17:00:00', 'Gedung B', 'Gedung B', 'hadir', 8.00, 'terpenuhi', 'Disetujui', 'Lead', 'Hadir'),
+  ((SELECT id FROM employees WHERE nip = 'EMP-003'), '2026-08-19', '2026-08-19 08:00:00', '2026-08-19 17:00:00', 'Gedung B', 'Gedung B', 'hadir', 8.00, 'terpenuhi', 'Disetujui', 'Lead', 'Hadir'),
+  ((SELECT id FROM employees WHERE nip = 'EMP-003'), '2026-08-20', '2026-08-20 08:00:00', '2026-08-20 17:00:00', 'Gedung B', 'Gedung B', 'hadir', 8.00, 'terpenuhi', 'Disetujui', 'Lead', 'Hadir'),
+  ((SELECT id FROM employees WHERE nip = 'EMP-003'), '2026-08-21', '2026-08-21 08:00:00', '2026-08-21 17:00:00', 'Gedung B', 'Gedung B', 'hadir', 8.00, 'terpenuhi', 'Disetujui', 'Lead', 'Hadir'),
+  ((SELECT id FROM employees WHERE nip = 'EMP-003'), '2026-08-24', NULL, NULL, NULL, NULL, 'unpaid_leave', NULL, 'terpenuhi', 'Disetujui', 'HRD', 'Cuti Tanpa Gaji'),
+  ((SELECT id FROM employees WHERE nip = 'EMP-003'), '2026-08-25', '2026-08-25 08:00:00', '2026-08-25 17:00:00', 'Gedung B', 'Gedung B', 'hadir', 8.00, 'terpenuhi', 'Disetujui', 'Lead', 'Hadir'),
+  ((SELECT id FROM employees WHERE nip = 'EMP-003'), '2026-08-26', '2026-08-26 08:00:00', '2026-08-26 17:00:00', 'Gedung B', 'Gedung B', 'hadir', 8.00, 'terpenuhi', 'Disetujui', 'Lead', 'Hadir'),
+  ((SELECT id FROM employees WHERE nip = 'EMP-003'), '2026-08-27', '2026-08-27 08:00:00', '2026-08-27 17:00:00', 'Gedung B', 'Gedung B', 'hadir', 8.00, 'terpenuhi', 'Disetujui', 'Lead', 'Hadir'),
+  ((SELECT id FROM employees WHERE nip = 'EMP-003'), '2026-08-28', '2026-08-28 08:00:00', '2026-08-28 17:00:00', 'Gedung B', 'Gedung B', 'hadir', 8.00, 'terpenuhi', 'Disetujui', 'Lead', 'Hadir'),
+  ((SELECT id FROM employees WHERE nip = 'EMP-003'), '2026-08-31', '2026-08-31 08:00:00', '2026-08-31 17:00:00', 'Gedung B', 'Gedung B', 'hadir', 8.00, 'terpenuhi', 'Disetujui', 'Lead', 'Hadir'),
+
+  -- Data September 2026
+  ((SELECT id FROM employees WHERE nip = 'EMP-001'), '2026-09-16', '2026-09-16 08:01:00', '2026-09-16 17:03:00', 'Gedung Utama', 'Gedung Utama', 'hadir', 8.03, 'terpenuhi', 'Disetujui', 'HRD', 'Hadir tepat waktu'),
+  ((SELECT id FROM employees WHERE nip = 'EMP-002'), '2026-09-16', NULL, NULL, NULL, NULL, 'cuti', NULL, 'terpenuhi', 'Disetujui', 'Manager', 'Cuti tahunan'),
+  ((SELECT id FROM employees WHERE nip = 'EMP-003'), '2026-09-16', '2026-09-16 08:10:00', '2026-09-16 17:00:00', 'Gedung B', 'Gedung B', 'hadir', 7.83, 'tidak_terpenuhi', 'Disetujui', 'Lead', 'Kurang dari 8 jam')
+ON DUPLICATE KEY UPDATE
+  checkin_at = VALUES(checkin_at),
+  checkout_at = VALUES(checkout_at),
+  checkin_location = VALUES(checkin_location),
+  checkout_location = VALUES(checkout_location),
+  attendance_type = VALUES(attendance_type),
+  duration_hours = VALUES(duration_hours),
+  status = VALUES(status),
+  verification_status = VALUES(verification_status),
+  verified_by_role = VALUES(verified_by_role),
+  remarks = VALUES(remarks);
+
+-- Rekapitulasi Presensi Bulanan (attendance_summaries)
+INSERT INTO attendance_summaries (
+  employee_id, period_year, period_month,
+  hadir, cuti, kuota_cuti, izin, kuota_izin,
+  unpaid_leave, kuota_unpaid_leave, status_hadir, calculated_at
+) VALUES
+  -- Periode Agustus 2026 (N-1)
+  ((SELECT id FROM employees WHERE nip = 'EMP-001'), 2026, 8, 21, 0, 12, 0, 3, 0, 5, 'Terpenuhi', NOW()),
+  ((SELECT id FROM employees WHERE nip = 'EMP-002'), 2026, 8, 20, 1, 12, 0, 3, 0, 5, 'Terpenuhi', NOW()),
+  ((SELECT id FROM employees WHERE nip = 'EMP-003'), 2026, 8, 16, 2, 12, 2, 3, 1, 5, 'Tidak terpenuhi', NOW()),
+  ((SELECT id FROM employees WHERE nip = 'EMP-016'), 2026, 8, 12, 0, 12, 3, 3, 0, 5, 'Tidak terpenuhi', NOW())
+ON DUPLICATE KEY UPDATE
+  hadir = VALUES(hadir),
+  cuti = VALUES(cuti),
+  kuota_cuti = VALUES(kuota_cuti),
+  izin = VALUES(izin),
+  kuota_izin = VALUES(kuota_izin),
+  unpaid_leave = VALUES(unpaid_leave),
+  kuota_unpaid_leave = VALUES(kuota_unpaid_leave),
+  status_hadir = VALUES(status_hadir),
+  calculated_at = NOW();
 
 COMMIT;

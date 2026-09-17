@@ -4,6 +4,7 @@ import {
   IconDatabaseFilled,
   IconUsers,
   IconHistory,
+  IconCalendarTime,
 } from "@tabler/icons-vue";
 
 export const menuItems = [
@@ -18,6 +19,12 @@ export const menuItems = [
     icon: IconUserFilled,
     to: "/pegawai",
     moduleCode: "employee",
+  },
+  {
+    title: "Presensi",
+    icon: IconCalendarTime,
+    to: "/presensi",
+    moduleCode: "attendance",
   },
   {
     title: "Tunjangan",

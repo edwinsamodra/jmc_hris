@@ -1,0 +1,77 @@
+nip,nama,tanggal,jam_masuk,lokasi_masuk,jam_pulang,lokasi_pulang,jenis_presensi,status_verifikasi,verifikator,keterangan
+EMP-007,Shani Ratnasari,2026-08-03,08:00:00,Gedung Utama,17:00:00,Gedung Utama,hadir,Disetujui,HRD,Hadir tepat waktu
+EMP-007,Shani Ratnasari,2026-08-04,08:05:00,Gedung Utama,17:05:00,Gedung Utama,hadir,Disetujui,HRD,Hadir tepat waktu
+EMP-007,Shani Ratnasari,2026-08-05,08:00:00,Gedung Utama,17:00:00,Gedung Utama,hadir,Disetujui,HRD,Hadir tepat waktu
+EMP-007,Shani Ratnasari,2026-08-06,08:02:00,Gedung Utama,17:03:00,Gedung Utama,hadir,Disetujui,HRD,Hadir tepat waktu
+EMP-007,Shani Ratnasari,2026-08-07,08:00:00,Gedung Utama,17:00:00,Gedung Utama,hadir,Disetujui,HRD,Hadir tepat waktu
+EMP-007,Shani Ratnasari,2026-08-10,08:01:00,Gedung Utama,17:02:00,Gedung Utama,hadir,Disetujui,HRD,Hadir tepat waktu
+EMP-007,Shani Ratnasari,2026-08-11,08:00:00,Gedung Utama,17:00:00,Gedung Utama,hadir,Disetujui,HRD,Hadir tepat waktu
+EMP-007,Shani Ratnasari,2026-08-12,08:04:00,Gedung Utama,17:05:00,Gedung Utama,hadir,Disetujui,HRD,Hadir tepat waktu
+EMP-007,Shani Ratnasari,2026-08-13,08:00:00,Gedung Utama,17:00:00,Gedung Utama,hadir,Disetujui,HRD,Hadir tepat waktu
+EMP-007,Shani Ratnasari,2026-08-14,08:06:00,Gedung Utama,17:10:00,Gedung Utama,hadir,Disetujui,HRD,Hadir tepat waktu
+EMP-007,Shani Ratnasari,2026-08-17,08:00:00,Gedung Utama,17:00:00,Gedung Utama,hadir,Disetujui,HRD,Upacara & Presensi
+EMP-007,Shani Ratnasari,2026-08-18,08:00:00,Gedung Utama,17:00:00,Gedung Utama,hadir,Disetujui,HRD,Hadir tepat waktu
+EMP-007,Shani Ratnasari,2026-08-19,08:03:00,Gedung Utama,17:05:00,Gedung Utama,hadir,Disetujui,HRD,Hadir tepat waktu
+EMP-007,Shani Ratnasari,2026-08-20,08:00:00,Gedung Utama,17:00:00,Gedung Utama,hadir,Disetujui,HRD,Hadir tepat waktu
+EMP-007,Shani Ratnasari,2026-08-21,08:02:00,Gedung Utama,17:05:00,Gedung Utama,hadir,Disetujui,HRD,Hadir tepat waktu
+EMP-007,Shani Ratnasari,2026-08-24,08:00:00,Gedung Utama,17:00:00,Gedung Utama,hadir,Disetujui,HRD,Hadir tepat waktu
+EMP-007,Shani Ratnasari,2026-08-25,08:05:00,Gedung Utama,17:10:00,Gedung Utama,hadir,Disetujui,HRD,Hadir tepat waktu
+EMP-007,Shani Ratnasari,2026-08-26,08:00:00,Gedung Utama,17:00:00,Gedung Utama,hadir,Disetujui,HRD,Hadir tepat waktu
+EMP-007,Shani Ratnasari,2026-08-27,08:01:00,Gedung Utama,17:02:00,Gedung Utama,hadir,Disetujui,HRD,Hadir tepat waktu
+EMP-007,Shani Ratnasari,2026-08-28,08:00:00,Gedung Utama,17:00:00,Gedung Utama,hadir,Disetujui,HRD,Hadir tepat waktu
+EMP-007,Shani Ratnasari,2026-08-31,08:00:00,Gedung Utama,17:00:00,Gedung Utama,hadir,Disetujui,HRD,Hadir tepat waktu
+EMP-008,Reza Dewanto,2026-08-03,08:05:00,Gedung B,17:05:00,Gedung B,hadir,Disetujui,Manager,Hadir tepat waktu
+EMP-008,Reza Dewanto,2026-08-04,08:10:00,Gedung B,17:15:00,Gedung B,hadir,Disetujui,Manager,Hadir tepat waktu
+EMP-008,Reza Dewanto,2026-08-05,08:00:00,Gedung B,17:00:00,Gedung B,hadir,Disetujui,Manager,Hadir tepat waktu
+EMP-008,Reza Dewanto,2026-08-06,08:02:00,Gedung B,17:05:00,Gedung B,hadir,Disetujui,Manager,Hadir tepat waktu
+EMP-008,Reza Dewanto,2026-08-07,08:08:00,Gedung B,17:10:00,Gedung B,hadir,Disetujui,Manager,Hadir tepat waktu
+EMP-008,Reza Dewanto,2026-08-10,08:00:00,Gedung B,17:00:00,Gedung B,hadir,Disetujui,Manager,Hadir tepat waktu
+EMP-008,Reza Dewanto,2026-08-11,08:05:00,Gedung B,17:05:00,Gedung B,hadir,Disetujui,Manager,Hadir tepat waktu
+EMP-008,Reza Dewanto,2026-08-12,08:00:00,Gedung B,17:00:00,Gedung B,hadir,Disetujui,Manager,Hadir tepat waktu
+EMP-008,Reza Dewanto,2026-08-13,08:03:00,Gedung B,17:05:00,Gedung B,hadir,Disetujui,Manager,Hadir tepat waktu
+EMP-008,Reza Dewanto,2026-08-14,08:00:00,Gedung B,17:00:00,Gedung B,hadir,Disetujui,Manager,Hadir tepat waktu
+EMP-008,Reza Dewanto,2026-08-17,08:00:00,Gedung B,17:00:00,Gedung B,hadir,Disetujui,Manager,Upacara & Presensi
+EMP-008,Reza Dewanto,2026-08-18,08:06:00,Gedung B,17:10:00,Gedung B,hadir,Disetujui,Manager,Hadir tepat waktu
+EMP-008,Reza Dewanto,2026-08-19,08:00:00,Gedung B,17:00:00,Gedung B,hadir,Disetujui,Manager,Hadir tepat waktu
+EMP-008,Reza Dewanto,2026-08-20,08:04:00,Gedung B,17:05:00,Gedung B,hadir,Disetujui,Manager,Hadir tepat waktu
+EMP-008,Reza Dewanto,2026-08-21,08:00:00,Gedung B,17:00:00,Gedung B,hadir,Disetujui,Manager,Hadir tepat waktu
+EMP-008,Reza Dewanto,2026-08-24,08:00:00,Gedung B,17:00:00,Gedung B,hadir,Disetujui,Manager,Hadir tepat waktu
+EMP-008,Reza Dewanto,2026-08-25,08:07:00,Gedung B,17:10:00,Gedung B,hadir,Disetujui,Manager,Hadir tepat waktu
+EMP-008,Reza Dewanto,2026-08-26,08:00:00,Gedung B,17:00:00,Gedung B,hadir,Disetujui,Manager,Hadir tepat waktu
+EMP-008,Reza Dewanto,2026-08-27,08:02:00,Gedung B,17:05:00,Gedung B,hadir,Disetujui,Manager,Hadir tepat waktu
+EMP-008,Reza Dewanto,2026-08-28,,,,,cuti,Disetujui,HRD,Cuti tahunan
+EMP-008,Reza Dewanto,2026-08-31,08:00:00,Gedung B,17:00:00,Gedung B,hadir,Disetujui,Manager,Hadir tepat waktu
+EMP-009,Gita Sekar Arum,2026-08-03,08:00:00,Gedung A,17:00:00,Gedung A,hadir,Disetujui,Lead,Hadir tepat waktu
+EMP-009,Gita Sekar Arum,2026-08-04,08:05:00,Gedung A,17:05:00,Gedung A,hadir,Disetujui,Lead,Hadir tepat waktu
+EMP-009,Gita Sekar Arum,2026-08-05,08:00:00,Gedung A,17:00:00,Gedung A,hadir,Disetujui,Lead,Hadir tepat waktu
+EMP-009,Gita Sekar Arum,2026-08-06,,,,,cuti,Disetujui,HRD,Cuti keluarga
+EMP-009,Gita Sekar Arum,2026-08-07,,,,,cuti,Disetujui,HRD,Cuti keluarga
+EMP-009,Gita Sekar Arum,2026-08-10,08:00:00,Gedung A,17:00:00,Gedung A,hadir,Disetujui,Lead,Hadir tepat waktu
+EMP-009,Gita Sekar Arum,2026-08-11,08:02:00,Gedung A,17:05:00,Gedung A,hadir,Disetujui,Lead,Hadir tepat waktu
+EMP-009,Gita Sekar Arum,2026-08-12,08:00:00,Gedung A,17:00:00,Gedung A,hadir,Disetujui,Lead,Hadir tepat waktu
+EMP-009,Gita Sekar Arum,2026-08-13,,,,,izin,Disetujui,HRD,Izin keperluan keluarga
+EMP-009,Gita Sekar Arum,2026-08-14,,,,,izin,Disetujui,HRD,Izin keperluan keluarga
+EMP-009,Gita Sekar Arum,2026-08-17,08:00:00,Gedung A,17:00:00,Gedung A,hadir,Disetujui,Lead,Upacara
+EMP-009,Gita Sekar Arum,2026-08-18,08:00:00,Gedung A,17:00:00,Gedung A,hadir,Disetujui,Lead,Hadir tepat waktu
+EMP-009,Gita Sekar Arum,2026-08-19,08:04:00,Gedung A,17:05:00,Gedung A,hadir,Disetujui,Lead,Hadir tepat waktu
+EMP-009,Gita Sekar Arum,2026-08-20,08:00:00,Gedung A,17:00:00,Gedung A,hadir,Disetujui,Lead,Hadir tepat waktu
+EMP-009,Gita Sekar Arum,2026-08-21,08:00:00,Gedung A,17:00:00,Gedung A,hadir,Disetujui,Lead,Hadir tepat waktu
+EMP-009,Gita Sekar Arum,2026-08-24,08:05:00,Gedung A,17:10:00,Gedung A,hadir,Disetujui,Lead,Hadir tepat waktu
+EMP-009,Gita Sekar Arum,2026-08-25,08:00:00,Gedung A,17:00:00,Gedung A,hadir,Disetujui,Lead,Hadir tepat waktu
+EMP-009,Gita Sekar Arum,2026-08-26,08:00:00,Gedung A,17:00:00,Gedung A,hadir,Disetujui,Lead,Hadir tepat waktu
+EMP-009,Gita Sekar Arum,2026-08-27,08:00:00,Gedung A,17:00:00,Gedung A,hadir,Disetujui,Lead,Hadir tepat waktu
+EMP-009,Gita Sekar Arum,2026-08-28,08:00:00,Gedung A,17:00:00,Gedung A,hadir,Disetujui,Lead,Hadir tepat waktu
+EMP-009,Gita Sekar Arum,2026-08-31,08:00:00,Gedung A,17:00:00,Gedung A,hadir,Disetujui,Lead,Hadir tepat waktu
+EMP-010,Dimas Anggara,2026-08-03,08:00:00,Gedung Utama,17:00:00,Gedung Utama,hadir,Disetujui,Lead,Hadir tepat waktu
+EMP-010,Dimas Anggara,2026-08-04,08:05:00,Gedung Utama,17:05:00,Gedung Utama,hadir,Disetujui,Lead,Hadir tepat waktu
+EMP-010,Dimas Anggara,2026-08-05,08:00:00,Gedung Utama,17:00:00,Gedung Utama,hadir,Disetujui,Lead,Hadir tepat waktu
+EMP-010,Dimas Anggara,2026-08-06,08:00:00,Gedung Utama,17:00:00,Gedung Utama,hadir,Disetujui,Lead,Hadir tepat waktu
+EMP-010,Dimas Anggara,2026-08-07,,,,,unpaid_leave,Disetujui,HRD,Izin di luar tanggungan
+EMP-010,Dimas Anggara,2026-08-10,08:00:00,Gedung Utama,17:00:00,Gedung Utama,hadir,Disetujui,Lead,Hadir tepat waktu
+EMP-010,Dimas Anggara,2026-08-11,08:02:00,Gedung Utama,17:05:00,Gedung Utama,hadir,Disetujui,Lead,Hadir tepat waktu
+EMP-010,Dimas Anggara,2026-08-12,08:00:00,Gedung Utama,17:00:00,Gedung Utama,hadir,Disetujui,Lead,Hadir tepat waktu
+EMP-010,Dimas Anggara,2026-08-13,08:00:00,Gedung Utama,17:00:00,Gedung Utama,hadir,Disetujui,Lead,Hadir tepat waktu
+EMP-010,Dimas Anggara,2026-08-14,08:00:00,Gedung Utama,17:00:00,Gedung Utama,hadir,Disetujui,Lead,Hadir tepat waktu
+EMP-010,Dimas Anggara,2026-08-17,08:00:00,Gedung Utama,17:00:00,Gedung Utama,hadir,Disetujui,Lead,Upacara
+EMP-010,Dimas Anggara,2026-08-18,08:00:00,Gedung Utama,17:00:00,Gedung Utama,hadir,Disetujui,Lead,Hadir tepat waktu
+EMP-010,Dimas Anggara,2026-08-19,08:00:00,Gedung Utama,17:00:00,Gedung Utama,hadir,Disetujui,Lead,Hadir tepat waktu
