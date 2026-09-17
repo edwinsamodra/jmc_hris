@@ -2,45 +2,104 @@
 
 Boilerplate admin dashboard menggunakan **Nuxt 4** dengan **Tabler UI v1.0.0-beta24**.
 
-## Memulai
+## Prasyarat Lingkungan Development (Dev Prerequisites)
 
-### 1. Install dependencies
+Pastikan mesin lokal Anda telah terpasang:
+- **Node.js:** `v20.x` atau `v22.x` / `v24.x` (LTS direkomendasikan)
+- **Package Manager:** `npm` (v10+)
+- **Docker & Docker Compose:** Untuk menjalankan MariaDB lokal
+
+---
+
+## Panduan Setup Development (Local Dev)
+
+Ikuti langkah-langkah berikut untuk memulai development:
+
+### 1. Salin Environment Template & Konfigurasi `.env`
+
+Salin file `.env.example` ke `.env`:
 
 ```bash
-npm install
+cp .env.example .env
 ```
 
-### 2. Konfigurasi `.env`
+Untuk development lokal standar, file `.env` sudah terisi nilai default yang siap pakai:
+```dotenv
+APP_NAME="HRIS JMC"
+APP_CLIENT="JMC"
+TZ="Asia/Jakarta"
 
-Edit `.env` untuk mengatur nama aplikasi dan nama client:
-
-```bash
-APP_NAME=NAME_APP_HERE
-APP_CLIENT=NAME_CLIENT_HERE
+DB_HOST=127.0.0.1
+DB_PORT=3306
+DB_NAME=jmc_hris
+DB_USER=admin
+DB_PASSWORD=jamurkembang
 ```
+> **Catatan:** Jika Anda membutuhkan fitur login Google OAuth, kirim email/OTP asli, atau reCAPTCHA live, lengkapi `CLIENT_ID`, `MAIL_USER`, dan `RECAPTCHA_*` di `.env`. Untuk mode simulasi lokal, nilai default sudah cukup.
 
-### 3. Jalankan development server
+---
+
+### 2. Jalankan Database MariaDB (via Docker)
+
+Jalankan container MariaDB di background:
 
 ```bash
-npm run dev
+docker compose up -d mariadb
 ```
+*Tabel skema ([init.sql](file:///Users/edwinsamodra/Code/jmc_hris/server/database/init.sql)) dan data seed awal ([seed.sql](file:///Users/edwinsamodra/Code/jmc_hris/server/database/seed.sql)) otomatis diimpor saat container pertama kali dibuat.*
 
-Buka [http://localhost:3000](http://localhost:3000)
-
-### 4. Menjalankan via Docker Compose (Rekomendasi)
-
+Untuk memastikan container aktif:
 ```bash
-# Jalankan App dan MariaDB container
-docker compose up -d --build
-```
-
-### 5. Build untuk production
-
-```bash
-npm run build
+docker compose ps
 ```
 
 ---
+
+### 3. Install Dependencies & Jalankan Dev Server
+
+```bash
+# Install dependencies
+npm install
+
+# Jalankan Nuxt 4 development server (hot-reload aktif)
+npm run dev
+```
+
+Buka antarmuka aplikasi di [http://localhost:3000](http://localhost:3000).
+
+---
+
+## Opsi: Menjalankan Full Stack via Docker
+
+Jika ingin menjalankan aplikasi Nuxt beserta MariaDB di dalam container tanpa perlu menginstall Node.js di host:
+
+```bash
+# Build dan jalankan seluruh container
+docker compose up -d --build
+
+# Melihat log container
+docker compose logs -f
+
+# Menghentikan container
+docker compose down
+```
+
+---
+
+## Perintah Pengembangan yang Sering Digunakan
+
+| Perintah | Kegunaan |
+| :--- | :--- |
+| `npm run dev` | Menjalankan server development lokal dengan hot-reload |
+| `npm run build` | Melakukan compile aplikasi untuk production (`.output`) |
+| `npm run preview` | Menjalankan preview dari build production secara lokal |
+| `docker compose up -d mariadb` | Menyalakan service database MariaDB |
+| `docker compose stop mariadb` | Menghentikan service database MariaDB |
+| `docker compose exec mariadb mariadb -uadmin -pjamurkembang jmc_hris` | Membuka interactive MariaDB CLI |
+| `curl http://localhost:3000/api/health` | Memeriksa status kesehatan API & koneksi database |
+
+---
+
 
 ## Dokumentasi API & Swagger UI
 
