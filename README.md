@@ -2,6 +2,14 @@
 
 Boilerplate admin dashboard menggunakan **Nuxt 4** dengan **Tabler UI v1.0.0-beta24**.
 
+## URL Aplikasi & Environment
+
+- **Production URL:** [https://hris.edwinlab.my.id](https://hris.edwinlab.my.id)
+- **Production API Docs:** [https://hris.edwinlab.my.id/api-docs](https://hris.edwinlab.my.id/api-docs)
+- **Local Development:** [http://localhost:3000](http://localhost:3000)
+
+---
+
 ## Prasyarat Lingkungan Development (Dev Prerequisites)
 
 Pastikan mesin lokal Anda telah terpasang:
