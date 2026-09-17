@@ -8,6 +8,11 @@ export default defineNuxtConfig({
 
   devtools: { enabled: true },
 
+  sourcemap: {
+    server: false,
+    client: false,
+  },
+
   runtimeConfig: {
     database: {
       host: process.env.DB_HOST || "127.0.0.1",
