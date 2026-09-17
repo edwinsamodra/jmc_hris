@@ -42,6 +42,21 @@ npm run build
 
 ---
 
+## Dokumentasi API & Swagger UI
+
+Aplikasi dilengkapi dengan antarmuka Swagger UI interaktif untuk melihat dan menguji endpoint API backend:
+
+- **Swagger UI:** [http://localhost:3000/api-docs](http://localhost:3000/api-docs)
+- **OpenAPI JSON Spec:** [http://localhost:3000/api/openapi](http://localhost:3000/api/openapi)
+
+### Cara Menguji Endpoint di Swagger UI:
+1. Akses [http://localhost:3000/api-docs](http://localhost:3000/api-docs) pada browser.
+2. Pilih salah satu endpoint yang ingin diuji (misal: `GET /api/employees`).
+3. Klik tombol **Try it out**.
+4. Isi parameter jika diperlukan, kemudian klik tombol **Execute** untuk melihat respon data secara langsung.
+
+---
+
 ## Kredensial Akun Berdasarkan Role
 
 Berikut akun bawaan (seed data) yang dapat digunakan untuk login ke sistem:
