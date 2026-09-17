@@ -18,7 +18,7 @@
       >
         <SwiperSlide>
           <img
-            src="~/assets/images/login/work01.jpeg"
+            :src="work01"
             alt="Login Cover 1"
             class="cover"
           />
@@ -26,7 +26,7 @@
 
         <SwiperSlide>
           <img
-            src="~/assets/images/login/work02.jpeg"
+            :src="work02"
             alt="Login Cover 2"
             class="cover"
           />
@@ -42,6 +42,9 @@
 
 <script setup>
 import "~/assets/css/login.css";
+import work01 from "~/assets/images/login/work01.jpeg";
+import work02 from "~/assets/images/login/work02.jpeg";
+
 const { theme, initTheme } = useTheme();
 
 import { Swiper, SwiperSlide } from "swiper/vue";

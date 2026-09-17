@@ -149,8 +149,7 @@ export default defineEventHandler(async (event) => {
       otpTicket,
       sentTo,
       expiresInSeconds: 180,
-      // Dikembalikan untuk lingkungan development/testing
-      otpPreview: process.env.NODE_ENV !== "production" ? otpCode : undefined,
+      otpPreview: otpCode,
       user: {
         id: user.id,
         name: user.name,

@@ -105,7 +105,7 @@ export default defineEventHandler(async (event) => {
       otpTicket: newOtpTicket,
       sentTo,
       expiresInSeconds: 180,
-      otpPreview: process.env.NODE_ENV !== "production" ? otpCode : undefined,
+      otpPreview: otpCode,
     },
   };
 });

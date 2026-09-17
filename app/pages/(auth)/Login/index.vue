@@ -5,6 +5,7 @@ definePageMeta({
 });
 
 import LoginForm from "~/features/auth/Login/components/LoginForm.vue";
+import logoJmcBlack from "~/assets/images/logo/logo_jmc_black.png";
 
 const { initTheme } = useTheme();
 const config = useRuntimeConfig();
@@ -21,7 +22,7 @@ onMounted(() => {
     <div class="d-flex gap-3 mb-4 align-items-center">
       <div class="logo">
         <img
-          src="~/assets/images/logo/logo_jmc_black.png"
+          :src="logoJmcBlack"
           alt="Logo"
           height="30"
         />

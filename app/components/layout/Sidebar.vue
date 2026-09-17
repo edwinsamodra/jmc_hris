@@ -7,7 +7,7 @@
       <!-- BRAND -->
       <h1 class="navbar-brand text-white ms-3 ms-lg-0 gap-3">
         <div class="logo">
-          <img src="~/assets/images/logo/logo_jmc.png" alt="Logo" height="15" />
+          <img :src="logoJmc" alt="Logo" height="15" />
         </div>
 
         <NuxtLink
@@ -28,7 +28,7 @@
           <div class="d-flex gap-3 align-items-center">
             <div class="image">
               <img
-                src="~/assets/images/logo/logo_jmc.png"
+                :src="logoJmc"
                 alt="Logo"
                 height="15"
               />
@@ -122,6 +122,7 @@
 
 <script setup>
 import { menuItems } from "~/data/menu.js";
+import logoJmc from "~/assets/images/logo/logo_jmc.png";
 
 const appName = "Admin";
 const route = useRoute();

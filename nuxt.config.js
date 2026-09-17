@@ -42,6 +42,9 @@ export default defineNuxtConfig({
       },
       charset: "utf-8",
       viewport: "width=device-width, initial-scale=1",
+      meta: [
+        { name: "robots", content: "noindex, nofollow, noarchive, nosnippet" },
+      ],
       link: [{ rel: "icon", type: "image/x-icon", href: "/favicon.png" }],
       script: [
         {

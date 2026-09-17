@@ -1,6 +1,6 @@
 # HRIS API Boilerplate
 
-API sederhana ini memakai server handler bawaan Nuxt/Nitro dan MariaDB `pj1`.
+API sederhana ini memakai server handler bawaan Nuxt/Nitro dan MariaDB `jmc_hris`.
 
 ## Dokumentasi Swagger
 
@@ -15,7 +15,7 @@ langsung. Aset antarmuka Swagger dimuat dari jsDelivr.
 ## Menjalankan seed
 
 ```bash
-docker exec -i mariadb mariadb -uadmin -p pj1 < server/database/seed.sql
+docker exec -i mariadb mariadb -uadmin -p jmc_hris < server/database/seed.sql
 ```
 
 Password akan diminta oleh client. Seed memakai upsert sehingga aman dijalankan
