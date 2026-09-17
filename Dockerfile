@@ -8,11 +8,8 @@ WORKDIR /app
 # Install dependencies needed for native modules / build
 RUN apk add --no-cache libc6-compat
 
-# Copy dependency manifests
-COPY package.json package-lock.json* ./
-
-# Install npm dependencies cleanly
-RUN npm ci
+# Install npm dependencies cleanly (with fallback if package-lock.json is missing or desynced)
+RUN if [ -f package-lock.json ]; then npm ci || npm install; else npm install; fi
 
 # Copy full application source code
 COPY . ./
